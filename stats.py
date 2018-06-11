@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-    脚本名: 天池html格式整理
+    脚本名: 相关数据统计
 Created on 2018-06-04
 @author:David Yisun
 @group:data
@@ -35,16 +35,18 @@ def read_html():
     return html_dict
 
 
-def basic_info():
-    """
-    基本信息抽取 包括：
-        title:公告名
-        name:上市公司名
-        stock:上市公司代码
-        time:公告发布时间
-        mark:公告编号
-    :return: 
-    """
-
-    return
+def check_notations():
+    html_dict = read_html()
+    notations = 0  # 存在申明
+    no_notations_list = []
+    reg = re.compile(r'本公司.*董事会.*全体.*保证.*')
+    for i in html_dict:
+        t = re.findall(reg, i['h'].text)
+        if len(t) != 0:
+            notations += 1
+        else:
+            no_notations_list.append(i)
+    print('text total -- {0}'.format(len(html_dict)))
+    print('notation exists -- {0}'.format(notations))
+    return no_notations_list
 
