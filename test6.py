@@ -18,9 +18,10 @@ import json
 classify = ['重大合同', '增减持', '定增']
 file_list = []
 for _classify in classify:
-    path = 'D:\WorkSpace\Python\projects\\tianchi\\announcement_extract\\data\\round2_adjust\\{0}\\html\\'.format(_classify)
-    files_name = os.listdir(path)[0:100]
+    path = './data/round2_adjust/{0}/html/'.format(_classify)
+    files_name = os.listdir(path)[0:10]
     file_list = [{'file_name': i, 'path': path+i, 'classify': _classify} for i in files_name]+file_list
+
 
 # 读入htmls 以字典形式保存
 def read_html():
@@ -65,14 +66,17 @@ def get_title():
 # 提取公共注释
 html_dict = read_html()
 notations = 0 # 存在申明
-no_notations_list = []
 t1 = '本公司董事会及全体董事保证本公告内容不存在任何虚假记载、误导性陈述或者重大遗漏，并对其内容的真实性、准确性和完整性承担个别及连带责任。'
 t2 = '本公司及董事会全体成员保证信息披露内容的真实、准确和完整，没有虚假记载、误导性陈述或重大遗漏'
 reg = re.compile('本公司.*董事会.*全体.*保证.*')
+no_notations = []
 for i in html_dict:
-    t = re.findall(reg, i['h'].text)
+    t = re.findall(reg, html_dict[i]['h'].text)
     if len(t) != 0:
         notations += 1
     else:
-        no_notations_list.append(i)
+        no_notations.append([i, html_dict[i]])
+
+
+
 

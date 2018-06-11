@@ -16,7 +16,7 @@ import re
 classify = ['重大合同', '增减持', '定增']
 file_list = []
 for _classify in classify:
-    path = 'D:\WorkSpace\Python\projects\\tianchi\\announcement_extract\\data\\round2_adjust\\{0}\\html\\'.format(_classify)
+    path = './data/round2_adjust/{0}/html/'.format(_classify)
     files_name = os.listdir(path)
     file_list = [{'file_name': i, 'path': path+i, 'classify': _classify} for i in files_name]+file_list
 
