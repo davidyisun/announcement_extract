@@ -41,7 +41,7 @@ def check_notations():
     no_notations_list = []
     reg = re.compile(r'本公司.*董事会.*全体.*保证.*')
     for i in html_dict:
-        t = re.findall(reg, i['h'].text)
+        t = re.findall(reg, html_dict[i]['h'].text)
         if len(t) != 0:
             notations += 1
         else:

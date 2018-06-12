@@ -77,6 +77,7 @@ for i in html_dict:
     else:
         no_notations.append([i, html_dict[i]])
 
+no_notations[0][0]
 
 
 
