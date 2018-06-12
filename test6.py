@@ -63,20 +63,28 @@ def get_title():
     titles = pd.DataFrame(title_list, columns=['id', 'title', 'classify'])
     return titles
 
+
 # 提取公共注释
 html_dict = read_html()
 notations = 0 # 存在申明
 t1 = '本公司董事会及全体董事保证本公告内容不存在任何虚假记载、误导性陈述或者重大遗漏，并对其内容的真实性、准确性和完整性承担个别及连带责任。'
 t2 = '本公司及董事会全体成员保证信息披露内容的真实、准确和完整，没有虚假记载、误导性陈述或重大遗漏'
-reg = re.compile('本公司.*董事会.*全体.*保证.*')
+t3 = '本公司及全体董事、监事、高级管理人员保证本发行情况报告书内容的真实、准确和完整，并对虚假记载、误 导性陈述或者重大遗漏负连带责任。'
+t4 = '本公司全体董事承诺本发行情况报告书不存在虚假记载、误导性陈述或重大遗漏，并对其真实性、准确性、完整性承担个别和连带的法律责任。'
+reg= re.compile('公司.*全体.*[保证|承诺].*[真实|完整|准确]')
 no_notations = []
+multi = []
 for i in html_dict:
-    t = re.findall(reg, html_dict[i]['h'].text)
+    text = html_dict[i]['h'].text
+    t = re.findall(reg, text.replace('\n', '').replace(' ', ''))
     if len(t) != 0:
         notations += 1
-    else:
+    elif len(t)==0:
         no_notations.append([i, html_dict[i]])
+    else:
+        multi.append([i, html_dict[i]])
 
 
-
+print(len(no_notations))
+print(len(multi))
 

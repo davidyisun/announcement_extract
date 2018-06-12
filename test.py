@@ -14,7 +14,7 @@ import re
 
 
 path = 'D:\WorkSpace\Python\projects\\tianchi\\announcement_extract\\data\\round1_train_20180518\定增\html\\'
-file = path+'7880.html'
+file = path+'12998.html'
 
 files_name = os.listdir(path)
 file_list = [path+i for i in files_name]
