@@ -84,6 +84,7 @@ for i in html_dict:
     else:
         multi.append([i, html_dict[i]])
 
+no_notations[0][0]
 
 print(len(no_notations))
 print(len(multi))
