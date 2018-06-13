@@ -50,3 +50,24 @@ def check_notations():
     print('notation exists -- {0}'.format(notations))
     return no_notations_list
 
+def check_punctuation():
+    html_dict = read_html()
+    count = 0
+    for i in html_dict:
+        a = html_dict[i].find_all(text=',')
+        if len(a) != 0:
+            count +=1
+    print('逗号: {0}'.format(len(count)))
+    return
+
+count = 0
+m = []
+n = []
+for i in html_dict:
+    a = html_dict[i]['h'].find_all(text=re.compile('、'))
+    if len(a) != 0:
+        count +=1
+        m.append(i)
+    else:
+        n.append(i)
+print(r'逗号: {0}'.format(count))
