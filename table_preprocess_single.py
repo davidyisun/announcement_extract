@@ -38,13 +38,22 @@ tables = d.find_all('table')
 table = tables[0].tbody
 
 # 获取行总数
-t = table.contents
-n_row = len(t)
+rows = table.find_all('tr', recursive=False)
+n_rows = len(rows)
+
+# 获取列总数
+cols = t[0].find_all('td')
+
+t = cols[0]
+
+
+
 
 import pandas as pd
 d1 = pd.read_html(file, header=0)
 df = pd.DataFrame(d1)
 
 
+# 统计单元格中既有colspan又有rowspan
 
 

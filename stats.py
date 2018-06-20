@@ -35,6 +35,14 @@ def read_html():
     return html_dict
 
 
+"""
+输出样例:  html_dict['100103.html']['h']
+
+   { '100103.html':{'classify': '定增',
+                     'h': <html><head></head><body><div title="辽宁成………………}
+    } 
+"""
+
 def check_notations():
     html_dict = read_html()
     notations = 0  # 存在申明
