@@ -119,6 +119,100 @@ len(d5)
 
 
 # 统计行头每个都有colspan标签
+data_list = []
+for i, t in enumerate(tables_tag_new):
+    text = t[0]
+    print('{0}:{1}'.format(i, text))
+    data = table_processing(t[1])
+    if data['all_has_multi_colspan'] == True:
+        data_list.append(t)
+
+
+table_processing(tables_tag_new[0][1])
+
+tbody = tables_tag_new[0][1]
+trs = tbody.find_all('tr', recursive=False)
+n_row = len(trs)  # 表行数
+title = None  # 表名
+headers_type = ''  # 表头类型
+headers = []  # 表头
+headers_array = np.array([None])  # 表头矩阵
+fields_type = []  # 表字段类型
+content = None
+# --- 逐行填表 ---
+for i, tr in enumerate(trs):
+    # --- check title ---
+    if title == None:
+        title = find_title(tr)
+        if title != -1:  # 表格内部不含title
+            continue
+    data = tr_processing(tr)
+    break
+
+tables = get_all_tables()
+data_list = []
+for i, t in enumerate(tables):
+    text = t[0]
+    print('{0}:{1}'.format(i, text))
+    d = table_processing(t[1])
+    if d == None:
+        continue
+    if d['all_has_multi_colspan'] and d['tr_most_rowspan']== True:
+        data_list.append(t)
+
+len(data_list)
+data_list[0][1]
+
+d = tables[498]
+m = table_processing(d[1])
+d[1]
+
+
+# 统计行头每个都有colspan标签
+data_list = []
+for i, t in enumerate(tables_tag_new):
+    text = t[0]
+    print('{0}:{1}'.format(i, text))
+    data = table_processing(t[1])
+    if data['all_has_multi_colspan'] == True:
+        data_list.append(t)
+
+
+# 统计连续整行
+def stat_continous_rows(tables):
+    data_list = []
+    for i, t in enumerate(tables):
+        text = t[0]
+        print('{0}:{1}'.format(i, text))
+        tbody = t[1]
+        # --- 表属性定义 ---
+        trs = tbody.find_all('tr', recursive=False)
+        n_row = len(trs)  # 表行数
+        title = None  # 表名
+        headers_type = '' # 表头类型
+        headers = []  # 表头
+        headers_array = np.array([None]) # 表头矩阵
+        fields_type = []  # 表字段类型
+        content = None
+        satisfied = False
+        for j, tr in enumerate(trs):
+            # --- check title ---
+            if title == None:
+                title = find_title(tr)
+                if title != -1:  # 表格内部含title 迭代下一个tr
+                    continue
+            # --- check headers ---
+            data = tr_processing(tr)
+            type = ''
+            if data['n_tds'] == 1:
+                satisfied = True
+                continue
+            else:
+                break
+        if satisfied:
+            data_list.append(t+[j])
+    return data_list
+d = stat_continous_rows(tables)
 
 
 

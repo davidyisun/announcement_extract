@@ -7,7 +7,6 @@ Created on 2018-06-13
 @group:data
 @contact:davidhu@wezhuiyi.com
 """
-
 import os
 from bs4 import BeautifulSoup
 import codecs
@@ -15,15 +14,15 @@ import re
 import itertools
 import numpy as np
 
-classify = ['重大合同', '增减持', '定增']
-file_list = []
-for _classify in classify:
-    path = './data/round2_adjust/{0}/html/'.format(_classify)
-    files_name = os.listdir(path)
-    file_list = [{'file_name': i, 'path': path+i, 'classify': _classify} for i in files_name]+file_list
 
 # 读入htmls 以字典形式保存
 def read_html():
+    classify = ['重大合同', '增减持', '定增']
+    file_list = []
+    for _classify in classify:
+        path = './data/round2_adjust/{0}/html/'.format(_classify)
+        files_name = os.listdir(path)
+        file_list = [{'file_name': i, 'path': path + i, 'classify': _classify} for i in files_name] + file_list
     html_dict = {}
     text_dict = {}
     for i, _file in enumerate(file_list):
@@ -46,85 +45,47 @@ def read_html():
                      'h': <html><head></head><body><div title="辽宁成………………}
     } 
 """
-
-# --- 获取所有表格进行分析 ---
-tables_tag = []
-html_dict = read_html()
-for index in html_dict:
-    print(index)
-    t = html_dict[index]
-    # 删去不含text 的 "td" "tr" "tbody"
-    # --- td
-    m = t['h'].find_all('td')
-    for j in m:
-        if j.find_all(text=True) == []:
-            j.decompose()
-    # --- tr
-    m = t['h'].find_all('tr')
-    for j in m:
-        if j.find_all(text=True) == []:
-            j.decompose()
-    # --- tbody
-    m = t['h'].find_all('tbody')
-    for j in m:
-        if j.find_all(text=True) == []:
-            j.decompose()
-    _tables_tag = t['h'].find_all('tbody')
-    # 不含表格的公告滤过
-    if _tables_tag == []:
-        continue
-    # 过滤空表格
-    tables_tag = tables_tag+list(itertools.zip_longest([index], _tables_tag, fillvalue=index))
-
-# --- 扣除 《释义》
-tables_tag_new = []
-for i, t in enumerate(tables_tag):
-    text = t[0]
-    annotation = t[1].find_all(text=re.compile('^ *指 *$'))
-    if len(annotation) > 10:
-        continue
-    tables_tag_new.append(t)
+def get_all_tables():
+    # --- 获取所有表格进行分析 ---
+    tables_tag = []
+    html_dict = read_html()
+    for index in html_dict:
+        print(index)
+        t = html_dict[index]
+        # 删去不含text 的"tr" "tbody"
+        # --- tr
+        m = t['h'].find_all('tr')
+        for j in m:
+            if j.find_all(text=True) == []:
+                j.decompose()
+        # --- tbody
+        m = t['h'].find_all('tbody')
+        for j in m:
+            if j.find_all(text=True) == []:
+                j.decompose()
+        _tables_tag = t['h'].find_all('tbody')
+        # 不含表格的公告滤过
+        if _tables_tag == []:
+            continue
+        # 过滤空表格
+        tables_tag = tables_tag+list(itertools.zip_longest([index], _tables_tag, fillvalue=index))
+    # --- 扣除 《释义》
+    tables_tag_new = []
+    for i, t in enumerate(tables_tag):
+        text = t[0]
+        annotation = t[1].find_all(text=re.compile('^ *指 *$'))
+        if len(annotation) > 10:
+            continue
+        tables_tag_new.append(t)
+    return tables_tag_new
 
 
-# --- 头行 ---
-row_title = []
-col_title = []
-table_content = []
-for i, t in enumerate(tables_tag_new):
-    text = t[0]
-    # 第一行
-    print('{0}:{1}'.format(i, text))
-    trs = t[1].find_all('tr', recursive=False)
-    rows_len = len(trs) #总行数
-    tr_1 = trs[0]
-    tr_1_tds = tr_1.find_all('td')
-    if len(tr_1_tds)== 1:
-        row_title.append(t)
-        continue
-    # 第一列头
-    td_1 = tr_1_tds[0]
-    row_len = td_1.get('rowspan')
-    if row_len == rows_len:
-        col_title.append(t)
-        continue
-    # 不含表名的
-    table_content.append(t)
-
-
-# --- 表名在第一行
-temp = []
-only_one_row = []
-for i in row_title:
-    text = i[0]
-    table = i[1]
-    trs = table.find_all('tr')
-    if len(trs) == 1:
-        only_one_row.append((i))
-        continue
-    if len(trs[1].find_all('td')) == 1:
-        temp.append(i)
-        
 def text_type(s):
+    """
+        判断单元格数据类型
+    :param s:
+    :return:
+    """
     res = 'string'
     return res
 
@@ -139,9 +100,14 @@ def td_processing(td):
     td_rowspan = 1
     td_colspan = 1
     if td.has_attr('rowspan'):
-        td_rowspan = td['rowspan']
+        td_rowspan = int(td['rowspan'])
     if td.has_attr('colspan'):
-        td_colspan = td['colspan']
+        td_colspan = int(td['colspan'])
+    # -填充空单元格
+    if td.text == '':
+        for t_child in td.stripped_strings:
+            t_child.replace_with('---')
+    print(text_type(td.text))
     td_type = np.array([[text_type(td.text)] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     td_content = np.array([[td.text] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     res = {'td_content': td_content,
@@ -150,20 +116,22 @@ def td_processing(td):
            'td_rowspan': td_rowspan}
     return res
 
+
 def tr_processing(tr):
     """
         行信息
     :param tr: tag 行
     :return: 字典
     """
+    print('good boy')
     tr_most_rowspan = 1 # 最大跨行数
     tr_most_colspan = 1 # 最大跨列数
     tds = tr.find_all('td')
     n_tds = len(tds)  # 行所含单元格数
-    tr_content = [] # 行各单元内容
-    tr_type = [] # 行各单元格数据类型
-    tr_col = 0 # 行 长度
-    count_tr_colspan = 0 # colspan大于1的td个数统计
+    tr_content = []  # 行各单元内容
+    tr_type = []  # 行各单元格数据类型
+    tr_cols = 0  # 行长度
+    count_tr_colspan = 0  # colspan大于1的td个数统计
     for td in tds:
         data = td_processing(td)
         if data['td_colspan'] > tr_most_colspan:
@@ -172,18 +140,21 @@ def tr_processing(tr):
             tr_most_rowspan = data['td_rowspan']
         tr_content.append(data['td_content'])
         tr_type.append(data['td_type'])
-        tr_col = tr_col+td['td_colspan']
-        if td['td_colspan'] > 1:
+        tr_cols = tr_cols+data['td_colspan']
+        if data['td_colspan'] > 1:
             count_tr_colspan += 1
     if count_tr_colspan == n_tds:
         all_has_multi_colspan = True
     else:
         all_has_multi_colspan = False
-    res = {'tr_most_span': tr_most_colspan,
+    res = {'tr_most_colspan': tr_most_colspan,
            'tr_most_rowspan': tr_most_rowspan,
            'n_tds': n_tds,
-           'all_has_multi_colspan': all_has_multi_colspan}
+           'all_has_multi_colspan': all_has_multi_colspan,
+           'tr_content': tr_content,
+           'tr_cols': tr_cols}
     return res
+
 
 def find_title(tr):
     """
@@ -191,23 +162,38 @@ def find_title(tr):
     :param tr:
     :return: 若有 输出 text; 否则 输出 -1
     """
-
     data = tr_processing(tr)
     if data['n_tds'] == 1:
-        return data['tr_content'][0][0]
+        return data['tr_content'][0][0][0]
     else:
         return -1
 
 
-def create_headers(tr):
+def check_headers(tr):
     """
-        建表头headers
+        检查表头headers
     :param tr:
-    :param headers:
     :return:
     """
     data = tr_processing(tr)
-    headers_array = []
+    type = ''
+    headers_array = np.empty(shape=(data['tr_most_rowspan'], data['tr_cols']), dtype='object')
+    res = {'type': type,
+           'headers_array': headers_array}
+    # --- 整个header被分为多个独立子header 暂不处理 example 10
+    if data['all_has_multi_colspan']:
+        res['type'] = 'multi_sub_tables'
+        return res
+    # --- 连续整行  暂不处理
+    if data['n_tds'] == 1:
+        res['type'] = 'continous_rows'
+        return res
+    # --- 单行多列 直接提取
+    if data['tr_most_colspan'] == 1 and data['tr_most_rowspan'] == 1:
+         pass
+    # --- 不含rowspan 部分td有colspan 左右拆该单元格 然后将其下数据合并 记录colspan的位置 example 8
+    # --- 不含colspan 部分td有rowspan 先拆后合
+
 
 def complete_headers(tr, headers_array):
     """
@@ -238,110 +224,39 @@ def table_processing(tbody):
     headers = []  # 表头
     headers_array = np.array([None]) # 表头矩阵
     fields_type = []  # 表字段类型
-    content = None
+    type = ''
     # --- 逐行填表 ---
     for i, tr in enumerate(trs):
         # --- check title ---
         if title == None:
             title = find_title(tr)
-            continue
+            if title != -1: # 表格内部含title 迭代下一个tr
+                continue
+        else:  # 有 title 定义为多表嵌套（分为母子表和并列表） 暂不考虑
+            sub_title = find_title(tr)
+            if sub_title != -1: # 存在多表嵌套
+                type = 'multi-tables'
+
         # --- check headers ---
         if headers_type == '':
             # 还没有表头
-            headers_array = create_headers(tr)
+            headers_array = check_headers(tr)
             continue
         if headers_type == 'part_headers':
             # 残缺表头
             headers_array = complete_headers(tr, headers_array)
 
 
-
-    
-    
-    
-    tr_1 = trs[0]
-    tr_1_content, tr_1_type, tr_1_col, tr_1_n_tds = tr_processing(tr_1)
-    n_col = tr_1_col # 表列数
-    # --- 初始化 内容表和类型表、表结构
-    content = np.array([None]*n_col*n_row).reshape(n_row, n_col)
-    td_type = np.array([None]*n_col*n_row).reshape(n_row, n_col)
-    table_structure = np.array([None]*n_col*n_row).reshape(n_row, n_col)
-    # --- 填表 ---
-    i = 0 # 行游标
-    j = 0 # 列游标
-    for tr in trs:
-        # 获取各行的单元格内容、单元格类型、列跨度、所含单元格数
-        tr_content, tr_type, tr_col, tr_n_tds = tr_processing(tr)
-        for td in tr_1_content:
-            # 寻找下一个空位
-            while content[i,j] != None:
-                j += 1
-            content[i:i+tr]
-
-        i += 1
-        j = 0
-
-
-
-
-
-
-
-def tr_processing(tr):
-    """
-        行处理        
-    :param tr: html的tr tag 
-    :return: 
-            tr_content: ndarray 行内容
-            tr_type: list 行类型
-            tr_col: 行长度
-            n_tds: 所含单元格数
-    """
-    tr_col = 0 # 行长度
-    tr_content = [] # 行各单元内容
-    tr_type = [] # 行各单元格数据类型
-    tds = tr.find_all('td')
-    n_tds = len(tds)
-    for i, td in enumerate(tds):
-        if td.has_attr('colspan'):
-            td_colspan = td['colspan']
-        else:
-            td_colspan = 1
-        if td.has_attr('rowspan'):
-            td_rowspan = td['rowspan']
-        else:
-            td_rowspan = 1
-        td_type = np.array([[text_type(td.text)]*td_colspan]*td_rowspan).reshape(td_rowspan, td_colspan)
-        td_content = np.array([[td.text]*td_colspan]*td_rowspan).reshape(td_rowspan, td_colspan)
-        tr_type.append(td_type)
-        tr_col = tr_col+td_colspan
-        tr_content.append(td_content)
-    return tr_content, tr_type, tr_col, n_tds
-
-
-
-    
-
-
-
-
-
-# --- title 判断 ---
-for i, t in enumerate(tables_tag_new):
-    text = t[0]
-    # 第一行  tr 行  td 单元格
-    print('{0}:{1}'.format(i, text))
-    trs = t[1].find_all('tr', recursive=False)
-    rows_len = len(trs) # 总行数
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    tables = get_all_tables()
+    data_list = []
+    for i, t in enumerate(tables):
+        text = t[0]
+        print('{0}:{1}'.format(i, text))
+        d = table_processing(t[1])
+        if d == None:
+            continue
+        if d['all_has_multi_colspan'] and d['tr_most_rowspan']== True:
+            data_list.append(t)
+    print('ok')
 
