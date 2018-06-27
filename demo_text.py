@@ -395,6 +395,7 @@ if __name__ == '__main__':
         """
     for index in contents:
         with codecs.open(file_info['save_path']+index+'.txt', 'w', 'utf-8') as f:
+            print('--- writing {0}'.format(index+'.txt'))
             output = [i['content'] for i in contents[index]]
             f.writelines('\n'.join(output))
 
