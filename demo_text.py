@@ -22,7 +22,7 @@ def get_path_args():
     parser = OptionParser(usage=usage)
     parser.add_option('--filepath', action='store', dest='file_path', type='string', default='/data/hadoop/yisun/data/tianchi/重大合同html_new/')
     parser.add_option('--filename', action='store', dest='file_name', type='string', default='')
-    parser.add_option('--savepath', action='store', dest='save_path', type='string', default='/data/hadoop/yisun/data/annoucement_txt/no_table/major_contracts/')
+    parser.add_option('--savepath', action='store', dest='save_path', type='string', default='/data/hadoop/yisun/data/announcement_txt/no_table/major_contracts')
     option, args = parser.parse_args()
     res = {'file_path': option.file_path,
            'file_name': option.file_name,
@@ -393,6 +393,7 @@ if __name__ == '__main__':
                                     {'content': '证券简称：洲际油气', 'type': 'complete_promption'},
                                     …………]}
         """
+    # 写入txt
     for index in contents:
         with codecs.open(file_info['save_path']+index+'.txt', 'w', 'utf-8') as f:
             print('--- writing {0}'.format(index+'.txt'))
