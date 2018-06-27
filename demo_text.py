@@ -152,6 +152,12 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
         _cur_text = pre_text+cur_text
         _cur_type = 'phrase'
         return True, _cur_text, _cur_type
+    # 短语(长度较长)--残句或整句
+    if cur_type in ['part_sentence', 'sentence'] and pre_type == 'phrase':
+        if len(pre_text) > 20:
+            _cur_text = pre_text + cur_text
+            _cur_type = cur_type
+            return True, _cur_text, _cur_type
     # 残句--短语
     if cur_type == 'phrase' and pre_type == 'part_sentence':
         _cur_text = pre_text+cur_text
