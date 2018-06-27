@@ -395,6 +395,9 @@ if __name__ == '__main__':
         """
     # 写入txt
     for index in contents:
+        # 有表格返回的是空值，跳过
+        if contents[index] == None:
+            continue
         with codecs.open(file_info['save_path']+index+'.txt', 'w', 'utf-8') as f:
             print('--- writing {0}'.format(index+'.txt'))
             output = [i['content'] for i in contents[index]]
