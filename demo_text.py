@@ -135,8 +135,8 @@ def text_classify(text):
 
 def check_merge(pre_type, cur_type, cur_text, pre_text):
     """
-        节点合并
-    :param pre_type:
+        节点合并 非表格 text 为文本 表格 text 为trs
+    :param pre_type: 
     :param cur_type:
     :param cur_text:
     :param pre_text:
@@ -201,18 +201,35 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
     return False, cur_text, cur_type
 
 
-def content_append(pre_type, pre_text):
-    if pre_type not in ['table']:
-        res = {'content': pre_text, 'type': pre_type}
+def check_table(type, content):
+    if type not in ['table']:
+        res = {'content': content, 'type': type}
     else:
-        content = table_processing(pre_text)
-    return
+        _content = table_processing(content)
+        res = {'content': _content, 'type': type}
+    return res
+
+
+def find_title(tr):
+    """
+        查找表格title
+    :param tr:
+    :return: 若有 输出 text; 否则 输出 -1
+    """
+    data = tr_processing(tr)
+    if data['n_tds'] == 1:
+        return data['tr_content'][0][0][0]
+    else:
+        return -1
 
 
 def table_processing(trs_list):
+    table_type = ''
     title = None  # 表名
-    headers = []  # 表头
     tables = []
+    res = {'title': title,
+           'table_type': table_type,
+           'tables': tables}
     # 计算表的基本信息
     rows = 0
     cols = 0
@@ -221,7 +238,7 @@ def table_processing(trs_list):
         tr_info = tr_processing(tr)
         cols = max(cols, tr_info['tr_cols'])
         trs_content.append(tr_info)
-    # 切表
+    # 切表 按行
     _table = []
     trs_content.reverse()  # 倒序检索 分割表格
     for tr in trs_content:
@@ -234,19 +251,30 @@ def table_processing(trs_list):
     tables.reverse()  # 还原顺序
 
     # 解析表格
-    n_subtable = len(tables) # 子表数量
-    title_append = True
-    for table in tables:
+    title_append = True # 总标题append开关
+    n_subtable = 0
+    for n, table in enumerate(tables):
         # 寻找总标题
         if len(table) == 1 and title_append:
-            title = tables[0][0]['tr_content'][0][0]+title
+            res['title'] = tables[0][0]['tr_content'][0][0]+res['title']
             continue
         else:
             title_append = False
-            n_subtable = len(tables)
-        # 解析单表
-        parser_single_table(table)
-    return
+            n_subtable = len(tables)-n # 字表数量
+            # 检查多行子表
+            if n_subtable > 1:
+                res['table_type'] = 'multi_row_tables' # 多行子表
+                return res
+        # 单表解析
+        single_type, single_content = parser_table(table)
+
+
+
+
+
+    if n_subtable == 0:
+        res['table_type'] = 'false_table' # 假表 只有title
+    return res
 
 
 def tr_processing(tr):
@@ -305,8 +333,8 @@ def td_processing(td):
     if td.text == '':
         for t_child in td.stripped_strings:
             t_child.replace_with('---')
-    print(text_type(td.text))
-    td_type = np.array([[text_type(td.text)] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
+    # print(cell_text_type(td.text))
+    td_type = np.array([[cell_text_type(td.text)] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     td_content = np.array([[td.text] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     res = {'td_content': td_content,
            'td_type': td_type,
@@ -315,7 +343,7 @@ def td_processing(td):
     return res
 
 
-def text_type(s):
+def cell_text_type(s):
     """
         判断单元格数据类型
     :param s:
@@ -325,19 +353,77 @@ def text_type(s):
     return res
 
 
-def parser_single_table(trs):
+def cell_location(_np_array, n_row, n_col):
+    i = 0
+    j = 0
+    while _np_array[i, j] != None:
+        j += 1
+        if j + 1 > n_col:  # 先找行 再找列
+            i += 1
+        if i > n_row:
+            return 'complete'
+    return [i, j]
+
+
+
+
+def parser_table(trs):
     """
         单表解析
     :param trs_text:
     :return:
     """
     title = ''
-    for tr in trs:
-        if title == '':
-            title = find_title(tr)
-            if title != -1: # 内涵表格 title 迭代下一个 tr
-                continue
-    return
+    type = ''
+    content = []
+    check_multi_col_tables = False
+    # 找title
+    title = find_title(trs[0])
+    if title != -1:
+        trs = trs[1:]
+    # 检查多列子表
+    _tr = tr_processing(trs[0])
+    if _tr['all_has_multi_colspan'] and _tr['tr_most_rowspan'] == 1:
+        type = 'multi_col_tables'  # 多列子表
+        tables = []
+        return type, content
+    else:
+        tables = [trs]
+    # 处理单表
+    for table in tables:
+        # 找子表名
+        _title = find_title(table[0])
+        if _title == -1 and title == -1:
+            sub_title = -1
+        if _title == -1 and title != -1:
+            sub_title = title
+        if _title != -1 and title != -1:
+            sub_title = title+_title
+            table = table[1:]
+        if _title != -1 and title == -1:
+            sub_title = _title
+            table = table[1:]
+        # 找 headers
+        _tr = tr_processing(table[0])
+        n_col = _tr['tr_cols']  # 矩阵列数
+        headers_array = np.empty(shape=(_tr['tr_most_rowspan'], _tr['tr_cols']), dtype='object')
+        i = 0
+        j = 0
+        while None in headers_array:
+            _tr = tr_processing(table[0])
+            table = table[1:0]
+            for td in _tr['content']:
+                end_i = td.shape[0]+i
+                end_j = td.shape[1]+j
+                headers_array[i:end_i, j:end_j] = td
+                # 定位下一个空单元格
+                _next_cell = cell_location(headers_array, _tr['tr_most_rowspan'], _tr['tr_cols'])
+                if _next_cell == 'complete':
+                    # 填完array
+                    break
+                # 更新坐标
+                i = _next_cell[0]
+                j = _next_cell[1]
 
 
 def find_title(tr):
@@ -372,7 +458,8 @@ def get_content(html):
             # 检查合并
             ismerge, cur_content, cur_type = check_merge(pre_type, cur_type, cur_content, pre_content)
             if not ismerge:
-                contents.append(copy.deepcopy({'content': pre_content, 'type': pre_type}))
+                content = check_table(pre_type, pre_content)
+                contents.append(copy.deepcopy({'content': content, 'type': pre_type}))
             pre_content = cur_content
             pre_type = cur_type
         contents.append({'content': cur_content, 'type': cur_type})
