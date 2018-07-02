@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-    脚本名:单个html test
+    脚本名:单个html test 天池html（不含表格）
 Created on 2018-06-12
 @author:David Yisun
 @group:data
@@ -13,6 +13,27 @@ import os
 import re
 import copy
 import numpy as np
+# 读入htmls 以字典形式保存
+def read_html2(filepath, filename=None):
+    file_list = []
+    if filename == None:
+        files_name = os.listdir(filepath)
+    else:
+        files_name = [filename]
+    file_list = [{'file_name': i, 'file_path': filepath+i} for i in files_name if i.endswith('.html')]
+    html_dict = {}
+    text_dict = {}
+    for i, _file in enumerate(file_list):
+        with codecs.open(_file['file_path'], 'r', 'utf8') as f:
+            data = f.read()
+            print('read {0}'.format(_file['file_name']))
+        # 去掉换行符
+        data = re.sub(re.compile('>\n* *<'), '><', data)
+        data = re.sub(re.compile('\n'), '', data)
+        _html = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
+        html_dict[_file['file_name']] = _html
+        text_dict[_file['file_name']] = data
+    return html_dict
 
 def content_classify(tag):
     """
@@ -76,49 +97,64 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
     # 两个连续短语
     if cur_type == 'phrase' and pre_type == 'phrase':
         _cur_text = pre_text+cur_text
+        _cur_text = _cur_text.replace(' ', '')
         _cur_type = 'phrase'
         return True, _cur_text, _cur_type
+    # 短语(长度较长)--残句或整句
+    if cur_type in ['part_sentence', 'sentence'] and pre_type == 'phrase':
+        if len(pre_text) > 20:
+            _cur_text = pre_text + cur_text
+            _cur_text = _cur_text.replace(' ', '')
+            _cur_type = cur_type
+            return True, _cur_text, _cur_type
     # 残句--短语
     if cur_type == 'phrase' and pre_type == 'part_sentence':
         _cur_text = pre_text+cur_text
+        _cur_text = _cur_text.replace(' ', '')
         _cur_type = 'part_sentence'
         return True, _cur_text, _cur_type
     # 残句--残句
     if cur_type == 'part_sentence' and pre_type == 'part_sentence':
         _cur_text = pre_text+cur_text
+        _cur_text = _cur_text.replace(' ', '')
         _cur_type = 'part_sentence'
         return True, _cur_text, _cur_type
     # 残句--整句
     if cur_type == 'sentence' and pre_type == 'part_sentence':
         _cur_text = pre_text+cur_text
+        _cur_text = _cur_text.replace(' ', '')
         _cur_type = text_classify(_cur_text)
         return True, _cur_text, _cur_type
     # 残句--提示head
     if cur_type == 'promption_head' and pre_type == 'part_sentence':
         _cur_text = pre_text+cur_text
         _cur_type = 'promption_head'
+        _cur_text = re.sub(re.compile('： *'), '：', _cur_text)
         return True, _cur_text, _cur_type
     # 残句--完整提示
     if cur_type == 'complete_promption' and pre_type == 'part_sentence':
         _cur_text = pre_text+cur_text
         _cur_type = 'complete_promption'
+        _cur_text = re.sub(re.compile('： *'), '：', _cur_text)
         return True, _cur_text, _cur_type
     # 提示head--短语、整句
     if cur_type in ['phrase', 'sentence'] and pre_type == 'promption_head':
         _cur_text = pre_text+cur_text
         _cur_type = 'complete_promption'
+        _cur_text = re.sub(re.compile('： *'), '：', _cur_text)
         return True, _cur_text, _cur_type
     # 提示head--残句
     if cur_type in ['part_sentence'] and pre_type == 'promption_head':
-        _cur_text = pre_text+cur_text
+        _cur_text = pre_text+cur_text.replace(' ', '')
         _cur_type = 'part_sentence'
+        _cur_text = re.sub(re.compile('： *'), '：', _cur_text)
         return True, _cur_text, _cur_type
     # table--table
     if cur_type in ['table'] and pre_type in ['table']:
         _cur_text = pre_text + cur_text
         _cur_type = 'table'
         return True, _cur_text, _cur_type
-    return False, cur_text, cur_type
+    return False, cur_text.replace(' ', ''), cur_type
 
 
 def content_append(pre_type, pre_text):
@@ -273,104 +309,122 @@ def find_title(tr):
         return -1
 
 
-
-
-catalogue = '重大合同'
-path = './data/round2_adjust/{0}/html/'.format(catalogue)
-file = path+'2467.html'
-# --- 单个html ---
-with codecs.open(file, 'r', 'utf8' ) as f:
-    data = f.read()
-data = re.sub(re.compile('>\n* *<'), '><', data)
-data = re.sub(re.compile('\n'), '', data)
-d = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
-
-# 甄别层级结构
-reg = re.compile('SectionCode(_\d*)*')
-section = []
-parent_set = set() # 非终点子节点集合
-for i in d.find_all('div', id=reg):
-    # 空节点忽略
-    if i.find_all(text=True) == []:
-        continue
-    # 是否含有表格
-    has_table = True
-    if i.find_all('table') == []:
-        has_table = False
-    # 确定 id 级别
-    id = i['id']
-    grade = len(re.findall('-', id))
-    # 确定 节点 父节点
-    if grade == 0:
-        parent = 0
-    else:
-        parent = re.findall('.*?(?=-\d+$)', id)[0]
-        parent_set.add(parent)
-    # 获取 节点 title
-    if i.has_attr('title'):
-        _title = i['title']
-    else:
-        _title = None
-    # 产生节点tree
-    section.append({'node_name': id,
-                    'parent_node': parent,
-                    'node_grade': grade,
-                    'title': _title,
-                    'has_table':has_table})
-
-section_list = [i for i in section if i['node_name'] not in parent_set]
-
-
-# 按tail层切割文档
-div = {}
-for _sec in section_list:
-    d1 = d.find_all('div', id=_sec['node_name'])[0]
-    contents = []
-    pre_content = ''     # 之前的content
-    pre_type = ''        # 之前的content 类型
-    cur_content = ''     # 当前的content
-    cur_type = ''        # 之前的content 类型
-    content_sec = d1.find_all('div', type='content') # 每个node下一层的content
-
-    # for i in content_sec:
-    #     # 滤过不含text和表格的 div
-    #     t = i.find_all(text=True)
-    #     if t==[]:
-    #         continue
-    #     table_node = i.find_all('table')
-    #     if table_node == []:
-    #         # ---文本---
-    #         _text = t[0].strip()
-    #         cur_content=[_text]
-    #         cur_type = text_classify(cur_content[0])
-    #         ismerge, cur_content[0], cur_type = check_text_merge(pre_type, cur_type, cur_content[0], pre_content[0])
-    #         if not ismerge:
-    #             contents.append(copy.deepcopy({'content': pre_content, 'type': pre_type}))
-    #         pre_content[0] = cur_content[0]
-    #         pre_type = cur_type
-    #     else:
-    #         if pre_type == 'table':
-    #             cur_content = 0
-
-    for i in content_sec:
-        # 滤过不含text和表格的 div
-        t = i.find_all(text=True)
-        if t == []:
+def get_content(html):
+    # 去掉表格
+    tables = html.find_all('table')
+    for i in tables:
+        i.decompose()
+    d = html
+    # 甄别层级结构
+    reg = re.compile('SectionCode(_\d*)*')
+    section = []
+    parent_set = set() # 非终点子节点集合
+    for i in d.find_all('div', id=reg):
+        # 空节点忽略
+        if i.find_all(text=True) == []:
             continue
-        # tag 分类
-        cur_type, cur_content = content_classify(i)
-        # 检查合并
-        ismerge, cur_content, cur_type = check_merge(pre_type, cur_type, cur_content, pre_content)
-        if not ismerge:
-            contents.append(copy.deepcopy({'content': pre_content, 'type': pre_type}))
-        pre_content = cur_content
-        pre_type = cur_type
+        # 是否含有表格
+        has_table = True
+        if i.find_all('table') == []:
+            has_table = False
+        # 确定 id 级别
+        id = i['id']
+        grade = len(re.findall('-', id))
+        # 确定 节点 父节点
+        if grade == 0:
+            parent = 0
+        else:
+            parent = re.findall('.*?(?=-\d+$)', id)[0]
+            parent_set.add(parent)
+        # 获取 节点 title
+        if i.has_attr('title'):
+            _title = i['title']
+        else:
+            _title = ''
+        # 产生节点tree
+        section.append({'node_name': id,
+                        'parent_node': parent,
+                        'node_grade': grade,
+                        'title': _title,
+                        'has_table':has_table})
+    # print(section)
+    title_list = [[i['node_name'],[i['title']]] for i in section]
+    # print(title_list)
+    section_list = [i for i in section if i['node_name'] not in parent_set]
+    # print(section_list)
 
-        # ---表格---
-    # 添加最后一个content
-    contents.append({'content': cur_content, 'type': cur_type})
-    div[_sec['node_name']] = contents
-    print(contents)
+    # 按tail层切割文档
+    div = {}
+    for _sec in section_list:
+        d1 = d.find_all('div', id=_sec['node_name'])[0]
+        contents = []
+        pre_content = ''     # 之前的content
+        pre_type = ''        # 之前的content 类型
+        cur_content = ''     # 当前的content
+        cur_type = ''        # 之前的content 类型
+        content_sec = d1.find_all('div', type='content') # 每个node下一层的content
+        # for i in content_sec:
+        #     # 滤过不含text和表格的 div
+        #     t = i.find_all(text=True)
+        #     if t==[]:
+        #         continue
+        #     table_node = i.find_all('table')
+        #     if table_node == []:
+        #         # ---文本---
+        #         _text = t[0].strip()
+        #         cur_content=[_text]
+        #         cur_type = text_classify(cur_content[0])
+        #         ismerge, cur_content[0], cur_type = check_text_merge(pre_type, cur_type, cur_content[0], pre_content[0])
+        #         if not ismerge:
+        #             contents.append(copy.deepcopy({'content': pre_content, 'type': pre_type}))
+        #         pre_content[0] = cur_content[0]
+        #         pre_type = cur_type
+        #     else:
+        #         if pre_type == 'table':
+        #             cur_content = 0
+        for i in content_sec:
+            # 滤过不含text和表格的 div
+            t = i.find_all(text=True)
+            if t == []:
+                continue
+            # tag 分类
+            cur_type, cur_content = content_classify(i)
+            # 检查合并
+            ismerge, cur_content, cur_type = check_merge(pre_type, cur_type, cur_content, pre_content)
+            # print(cur_content.replace(' ', ''))
+            if not ismerge:
+                contents.append(copy.deepcopy({'content': pre_content, 'type': pre_type}))
+            pre_content = cur_content
+            pre_type = cur_type
+
+            # ---表格---
+        # 添加最后一个content
+        contents.append({'content': cur_content, 'type': cur_type})
+        div[_sec['node_name']] =[i['content'] for i in contents]
+    for n, i in enumerate(title_list):
+        node = i[0]
+        if node in div:
+            title_list[n][1] = title_list[n][1]+div[node]
+    res = []
+    for i in title_list:
+        res = res+i[1]
+    return res
+
+if __name__ == '__main__':
+    path = './data/data_train/重大合同/html/'
+    filename = '15335258.html'
+    html_dict = read_html2(filepath=path, filename=filename)
+    total = 0
+    for index in html_dict:
+        content = get_content(html_dict[index])
+        content = [re.sub(' +', '', i) for i in content]
+        print(content)
+        with codecs.open('./data/data_txt/major_contracts/'+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
+            print('--- writing {0}'.format(index.replace('.html', '.txt')))
+            f.write('\n'.join(content))
+            total += 1
+            print('counts:'+str(total))
+
 
 
 

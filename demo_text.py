@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-    脚本名: 非table 重大合同 信息整理
+    脚本名: html格式整理（韩表格部分）
+    html来源: 内部购买的商用软件转换的html
 Created on 2018-06-27
 @author:David Yisun
 @group:data
@@ -94,15 +95,14 @@ def content_classify(tag):
     :param tag:
     :return:
     """
-    table_node = tag.find_all('table')
-    if table_node == []:
+    if tag.name != 'table':
         # ---文本---
         _text = tag.get_text()
         _text = re.sub(' ', '', _text)
         cur_content = _text.strip()
         cur_type = text_classify(cur_content)
     else:
-        cur_content = tag.tbody.find_all('tr', recursive=False)
+        cur_content = tag.find_all('tr')
         cur_type = 'table'
     return cur_type, cur_content
 
@@ -210,15 +210,14 @@ def check_table(type, content):
     return res
 
 
-def find_title(tr):
+def find_title(tr_dict):
     """
         查找表格title
-    :param tr:
+    :param tr_dict: 经过tr_processing处理过后的tr tag
     :return: 若有 输出 text; 否则 输出 -1
     """
-    data = tr_processing(tr)
-    if data['n_tds'] == 1:
-        return data['tr_content'][0][0][0]
+    if tr_dict['n_tds'] == 1:
+        return tr_dict['tr_content'][0][0][0]
     else:
         return -1
 
@@ -241,12 +240,14 @@ def table_processing(trs_list):
     # 切表 按行
     _table = []
     trs_content.reverse()  # 倒序检索 分割表格
-    for tr in trs_content:
-        _table.append(tr)
-        if tr['tr_cols'] == cols:
-            tables.append(_table.reverse())
+    for tr_dict in trs_content:
+        _table.append(tr_dict)
+        if tr_dict['tr_most_colspan'] == cols:
+            _table.reverse()
+            tables.append(_table)
             _table = []
     if _table != []:
+        _table.reverse()
         tables.append(_table)  # append最前一个表
     tables.reverse()  # 还原顺序
 
@@ -267,11 +268,6 @@ def table_processing(trs_list):
                 return res
         # 单表解析
         single_type, single_content = parser_table(table)
-
-
-
-
-
     if n_subtable == 0:
         res['table_type'] = 'false_table' # 假表 只有title
     return res
@@ -331,11 +327,12 @@ def td_processing(td):
         td_colspan = int(td['colspan'])
     # -填充空单元格
     if td.text == '':
-        for t_child in td.stripped_strings:
-            t_child.replace_with('---')
+        td_text = '---'
+    else:
+        td_text = td.text
     # print(cell_text_type(td.text))
-    td_type = np.array([[cell_text_type(td.text)] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
-    td_content = np.array([[td.text] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
+    td_type = np.array([[cell_text_type(td_text)] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
+    td_content = np.array([[td_text] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     res = {'td_content': td_content,
            'td_type': td_type,
            'td_colspan': td_colspan,
@@ -350,24 +347,30 @@ def cell_text_type(s):
     :return:
     """
     res = 'string'
+    if s == '---':
+        res = 'placeholder'
+        return res
     return res
 
 
 def cell_location(_np_array, n_row, n_col):
     i = 0
     j = 0
+    # print(n_row)
+    # print(n_col)
     while _np_array[i, j] != None:
+        # print('indicator:({0},{1})'.format(i, j))
+        # print('content:'+str(_np_array[i, j]))
         j += 1
-        if j + 1 > n_col:  # 先找行 再找列
+        if j >= n_col:  # 先找行 再找列
+            j = 0
             i += 1
-        if i > n_row:
+        if i >= n_row:
             return 'complete'
     return [i, j]
 
 
-
-
-def parser_table(trs):
+def parser_table(trs_dict):
     """
         单表解析
     :param trs_text:
@@ -378,17 +381,17 @@ def parser_table(trs):
     content = []
     check_multi_col_tables = False
     # 找title
-    title = find_title(trs[0])
+    title = find_title(trs_dict[0])
     if title != -1:
-        trs = trs[1:]
+        trs = trs_dict[1:]
     # 检查多列子表
-    _tr = tr_processing(trs[0])
+    _tr = trs_dict[0]
     if _tr['all_has_multi_colspan'] and _tr['tr_most_rowspan'] == 1:
         type = 'multi_col_tables'  # 多列子表
         tables = []
         return type, content
     else:
-        tables = [trs]
+        tables = [trs_dict]
     # 处理单表
     for table in tables:
         # 找子表名
@@ -404,67 +407,98 @@ def parser_table(trs):
             sub_title = _title
             table = table[1:]
         # 找 headers
-        _tr = tr_processing(table[0])
+        _tr = table[0]
         n_col = _tr['tr_cols']  # 矩阵列数
         headers_array = np.empty(shape=(_tr['tr_most_rowspan'], _tr['tr_cols']), dtype='object')
         i = 0
         j = 0
         while None in headers_array:
-            _tr = tr_processing(table[0])
-            table = table[1:0]
-            for td in _tr['content']:
+            _tr = table[0]
+            table.pop(0)
+            print('- - '*20)
+            print(_tr['tr_content'])
+            for td in _tr['tr_content']:
                 end_i = td.shape[0]+i
                 end_j = td.shape[1]+j
                 headers_array[i:end_i, j:end_j] = td
                 # 定位下一个空单元格
-                _next_cell = cell_location(headers_array, _tr['tr_most_rowspan'], _tr['tr_cols'])
+                print(headers_array)
+                _next_cell = cell_location(headers_array, headers_array.shape[0], headers_array.shape[1])
                 if _next_cell == 'complete':
                     # 填完array
                     break
                 # 更新坐标
                 i = _next_cell[0]
                 j = _next_cell[1]
+        # headers 按行合并
+        _headers_list = []
+        for i in headers_array.T:
+            _h_list = []
+            for k, j in enumerate(i):
+                if j not in _h_list:
+                    _h_list.append(j)
+            _headers_list.append('-'.join(_h_list))
+        # 找 table
+        table_row = len(table)
+        table_col = headers_array.shape[1]
+        table_array = np.empty(shape=(table_row, table_col), dtype='object')
+        i = 0
+        j = 0
+        while None in table_array:
+            _tr = table[0]
+            table.pop(0)
+            for td in _tr['tr_content']:
+                end_i = td.shape[0]+i
+                end_j = td.shape[1]+j
+                table_array[i:end_i, j:end_j] = td
+                # 定位下一个空单元格
+                print(headers_array)
+                _next_cell = cell_location(table_array, table_array.shape[0], table_array.shape[1])
+                if _next_cell == 'complete':
+                    # 填完array
+                    break
+                # 更新坐标
+                i = _next_cell[0]
+                j = _next_cell[1]
+        # headers 按列合并
+        _table_array = np.empty(shape=(table_array.shape[0], table_array.shape[1]), dtype='object')
+        _t_array = np.vstack((np.array(_headers_list), _table_array))
+        t_array = np.array()
+        for head in _headers_list:
+            if t_array.shape == (0, ):
+                t_array = np.vstack()
 
 
-def find_title(tr):
-    """
-        查找表格title
-    :param tr:
-    :return: 若有 输出 text; 否则 输出 -1
-    """
-    data = tr_processing(tr)
-    if data['n_tds'] == 1:
-        return data['tr_content'][0][0][0]
-    else:
-        return -1
+
+    return
 
 
 def get_content(html):
     body = html.body
-    if body.find_all('table') == []:
-        content_tags = body.find_all('p', recursive=False)
-        contents = []
-        pre_content = ''  # 之前的content
-        pre_type = ''  # 之前的content 类型
-        cur_content = ''  # 当前的content
-        cur_type = ''  # 之前的content 类型
-        for i in content_tags:
-            # 滤过不含text和表格的 div
-            t = i.find_all(text=True)
-            if t == []:
-                continue
-            # tag 分类
-            cur_type, cur_content = content_classify(i)
-            # 检查合并
-            ismerge, cur_content, cur_type = check_merge(pre_type, cur_type, cur_content, pre_content)
-            if not ismerge:
-                content = check_table(pre_type, pre_content)
-                contents.append(copy.deepcopy({'content': content, 'type': pre_type}))
-            pre_content = cur_content
-            pre_type = cur_type
-        contents.append({'content': cur_content, 'type': cur_type})
-        return contents
-    return
+    content_tags = body.find_all(re.compile('table|p'), recursive=False)
+    # print(content_tags)
+    contents = []
+    pre_content = ''  # 之前的content
+    pre_type = ''  # 之前的content 类型
+    cur_content = ''  # 当前的content
+    cur_type = ''  # 之前的content 类型
+    for i in content_tags:
+        # 滤过不含text和表格的 div
+        t = i.find_all(text=True)
+        if t == []:
+            continue
+        # tag 分类
+        cur_type, cur_content = content_classify(i)
+        print(cur_type)
+        # 检查合并
+        ismerge, cur_content, cur_type = check_merge(pre_type, cur_type, cur_content, pre_content)
+        if not ismerge:
+            content = check_table(pre_type, pre_content)
+            contents.append(copy.deepcopy({'content': content, 'type': pre_type}))
+        pre_content = cur_content
+        pre_type = cur_type
+    contents.append({'content': cur_content, 'type': cur_type})
+    return contents
 
 
 if __name__ == '__main__':
@@ -489,7 +523,6 @@ if __name__ == '__main__':
             print('--- writing {0}'.format(index+'.txt'))
             output = [i['content'] for i in contents[index]]
             f.writelines('\n'.join(output))
-
 
 
     # with codecs.open('./data/temp/20526259.html', 'r', 'utf-8') as f:
@@ -524,8 +557,3 @@ if __name__ == '__main__':
     #     with codecs.open('output3.txt', 'a', 'utf8') as f:
     #         output = [i['content'] for i in contents]
     #         f.writelines('\n'.join(output))
-
-
-
-
-

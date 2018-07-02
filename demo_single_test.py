@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-    脚本名:
+    脚本名: 仕锋软件转换 no table
 Created on 2018--
 @author:David Yisun
 @group:data
@@ -14,7 +14,6 @@ import copy
 import os
 # 读入htmls 以字典形式保存
 def read_html2(filepath, filename=None):
-    file_list = []
     if filename == None:
         files_name = os.listdir(filepath)
     else:
@@ -72,6 +71,7 @@ def text_classify(text):
         return 'part_sentence'
     if re.findall(re.compile('.+：.+'), text) != []:
         return 'complete_promption'
+
 
 def check_merge(pre_type, cur_type, cur_text, pre_text):
     """
@@ -141,7 +141,6 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
     return False, cur_text, cur_type
 
 
-
 def get_content(html):
     body = html.body
     # 去掉表格
@@ -149,9 +148,10 @@ def get_content(html):
     for i in tables:
         i.decompose()
     s = []
-    for _s in body.stripped_strings:
-        t = _s.strip()
-        s.append(t)
+    for p in body.find_all('p', recursive=False):
+        _s = p.get_text()
+        _s = _s.strip()
+        s.append(_s)
     contents = []
     pre_content = ''  # 之前的content
     pre_type = ''  # 之前的content 类型
@@ -167,8 +167,9 @@ def get_content(html):
     contents.append({'content': cur_content, 'type': cur_type})
     return contents
 
+
 if __name__ == '__main__':
-    html_dict = read_html2(filepath='./data/round2_adjust/重大合同/html/', filename='68.html')
+    html_dict = read_html2(filepath='./data/data_shifeng/html/', filename=None)
     contents = {}
     for index in html_dict:
         content = get_content(html_dict[index])
@@ -178,7 +179,7 @@ if __name__ == '__main__':
         # 有表格返回的是空值，跳过
         if contents[index] == None:
             continue
-        with codecs.open('./'+index+'.txt', 'w', 'utf-8') as f:
+        with codecs.open('./data/data_shifeng_txt/'+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
             print('--- writing {0}'.format(index+'.txt'))
             output = [i['content'] for i in contents[index]]
             f.writelines('\n'.join(output))

@@ -69,9 +69,6 @@ for i in html_list:
     with codecs.open(_save_path, 'w', 'utf8') as f:
         f.write(tt)
 
-
-
-
 # --- 相关统计 ---
 tables = 0  # 存在表格
 for i in html_list:
