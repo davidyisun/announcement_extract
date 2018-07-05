@@ -3,4 +3,11 @@
 ## 正则匹配匹配表
 * 文章要点识别       
 `\d+、(?!\d+、).+?(?=\d+、)|\d+、(?!\d+、).*。$`
-* 
+## 格式转换命令行
+* txt to txt
+`python demo_txt.py --filepath D:\\WorkSpace\\Python\\to_github\\announcement_extract\\data\\0605\\增减持\\html\\ --filename 7079.html --savepath D:\\WorkSpace\\Python\\to_github\\announcement_extract\\data\\temp\\`
+* html to txt
+`python tianchi_html.py --filepath D:\\WorkSpace\\Python\\to_github\\announcement_extract\\data\\0605\\增减持\\html\\ --filename 7079.html --savepath D:\\WorkSpace\\Python\\to_github\\announcement_extract\\data\\temp\\`
+`python tianchi_html.py --filepath E:\\projects\\数据转换\\天池训练集_增减持\\no_table_html\\ --savepath E:\\projects\\数据转换\\天池训练集_增减持\\result\\`
+
+

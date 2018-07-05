@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-    脚本名: 仕锋软件转换 no table
+    脚本名: 仕锋软件转换 no table  子标签 含有 <p> <h*> <table>
 Created on 2018--
 @author:David Yisun
 @group:data
@@ -148,8 +148,10 @@ def get_content(html):
     for i in tables:
         i.decompose()
     s = []
-    for p in body.find_all('p', recursive=False):
+    for p in body.find_all(True, recursive=False):
         _s = p.get_text()
+        if _s == '':
+            continue
         _s = _s.strip()
         s.append(_s)
     contents = []

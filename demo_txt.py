@@ -34,7 +34,6 @@ def read_txt(filepath, filename=None):
         files_name = os.listdir(filepath)
     else:
         files_name = [filename]
-    print(files_name)
     file_list = [{'file_name': i, 'file_path': filepath+i} for i in files_name if i.endswith('.txt')]
     txt_dict = {}
     for i, _file in enumerate(file_list):
@@ -176,13 +175,13 @@ if __name__ == '__main__':
     file_info = get_path_args()
     txt_dict = read_txt(filepath=file_info['file_path'], filename=file_info['file_name'])
     contents = {}
-    for index in txt_dict:
-        content = get_content(txt_dict[index])
-        text = [j['content'] for j in content]
-        contents[index] = text
-        total = 0
-        with codecs.open(file_info['save_path']+index, 'w', 'utf-8') as f:
-            print('--- writing {0}'.format(index))
-            f.write('\n'.join(text))
-            total += 1
-            print('counts:'+str(total))
+    # for index in txt_dict:
+    #     content = get_content(txt_dict[index])
+    #     text = [j['content'] for j in content]
+    #     contents[index] = text
+    #     total = 0
+    #     with codecs.open(file_info['save_path']+index, 'w', 'utf-8') as f:
+    #         print('--- writing {0}'.format(index))
+    #         f.write('\n'.join(text))
+    #         total += 1
+    #         print('counts:'+str(total))

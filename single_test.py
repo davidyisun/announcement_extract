@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 """
-    脚本名:单个html test 天池html（不含表格）
+    脚本名:单个html test 天池html（buhanbiaoge）
 Created on 2018-06-12
 @author:David Yisun
 @group:data

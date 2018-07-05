@@ -16,9 +16,25 @@ import re
 import copy
 import numpy as np
 import bs4
+from optparse import OptionParser
+# 获取读写路径
+def get_path_args():
+    usage = 'pdf_file_path_get'
+    parser = OptionParser(usage=usage)
+    parser.add_option('--filepath', action='store', dest='file_path', type='string', default='/data/hadoop/yisun/data/tianchi/重大合同html_new/')
+    parser.add_option('--filename', action='store', dest='file_name', type='string', default='')
+    parser.add_option('--savepath', action='store', dest='save_path', type='string', default='/data/hadoop/yisun/data/announcement_txt/no_table/major_contracts/')
+    option, args = parser.parse_args()
+    res = {'file_path': option.file_path,
+           'file_name': option.file_name,
+           'save_path': option.save_path}
+    if res['file_name'] == '':
+        res['file_name'] = None
+    return res
+
+
 # 读入htmls 以字典形式保存
 def read_html2(filepath, filename=None):
-    file_list = []
     if filename == None:
         files_name = os.listdir(filepath)
     else:
@@ -47,6 +63,7 @@ def get_content(tag):
     """
 
     contents = []
+    # 如果是string 树的终点
     if type(tag) == bs4.element.NavigableString:
         contents.append(tag)
         return contents
@@ -172,6 +189,11 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
 
 
 def content_format(txt_list):
+    """
+        合并文段
+    :param txt_list: 
+    :return: 
+    """
     contents = []
     pre_content = ''  # 之前的content
     pre_type = ''  # 之前的content 类型
@@ -195,10 +217,11 @@ def content_format(txt_list):
 
 
 if __name__ == '__main__':
-    path = './data/0605/重大合同/html/'
-    filename = None
-    outpath = './data/0605_txt/重大合同/'
-    html_dict = read_html2(filepath=path, filename=filename)
+    # path = './data/0605/重大合同/html/'
+    # filename = None
+    # outpath = './data/0605_txt/重大合同/'
+    file_info = get_path_args()
+    html_dict = read_html2(filepath=file_info['file_path'], filename=file_info['file_name'])
     total = 0
     for index in html_dict:
         # 去掉表格tag
@@ -209,8 +232,7 @@ if __name__ == '__main__':
         content = [re.sub(' +', '', i) for i in content]
         content = content_format(content)
         content = [i['content'] for i in content]
-        print(content)
-        with codecs.open(outpath+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
+        with codecs.open(file_info['save_path']+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
             print('--- writing {0}'.format(index.replace('.html', '.txt')))
             f.write('\n'.join(content))
             total += 1

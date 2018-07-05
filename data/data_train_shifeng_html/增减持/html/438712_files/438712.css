@@ -1,0 +1,21 @@
+﻿ table.main {}
+ tr.row {}
+ td.cell {}
+ div.block {}
+ div.paragraph {}
+ .font0 { font:4pt Arial, sans-serif; }
+ .font1 { font:5pt Arial, sans-serif; }
+ .font2 { font:6pt Arial, sans-serif; }
+ .font3 { font:10pt Arial, sans-serif; }
+ .font4 { font:11pt Arial, sans-serif; }
+ .font5 { font:12pt Arial, sans-serif; }
+ .font6 { font:20pt Arial, sans-serif; }
+ .font7 { font:10pt Century Schoolbook, serif; }
+ .font8 { font:5pt SimHei, monospace; }
+ .font9 { font:10pt SimHei, monospace; }
+ .font10 { font:12pt SimHei, monospace; }
+ .font11 { font:14pt SimHei, monospace; }
+ .font12 { font:22pt SimHei, monospace; }
+ .font13 { font:23pt SimHei, monospace; }
+ .font14 { font:11pt SimSun, monospace; }
+ .font15 { font:14pt SimSun, monospace; }

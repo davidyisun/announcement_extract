@@ -17,6 +17,8 @@ import itertools
 import numpy as np
 import copy
 from optparse import OptionParser
+import pandas as pd
+import json
 
 def get_path_args():
     usage = 'pdf_file_path_get'
@@ -68,7 +70,6 @@ def read_html():
 
 
 def read_html2(filepath, filename=None):
-    file_list = []
     if filename == None:
         files_name = os.listdir(filepath)
     else:
@@ -83,6 +84,8 @@ def read_html2(filepath, filename=None):
         # 去掉换行符
         data = re.sub(re.compile('>\n* *<'), '><', data)
         data = re.sub(re.compile('\n'), '', data)
+        # # 去掉特殊空格
+        # data = re.sub(' ', '', data)
         _html = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
         html_dict[_file['file_name']] = _html
         text_dict[_file['file_name']] = data
@@ -103,7 +106,7 @@ def content_classify(tag):
         cur_type = text_classify(cur_content)
     else:
         cur_content = tag.find_all('tr')
-        cur_type = 'table'
+        cur_type = 'table_trs'
     return cur_type, cur_content
 
 
@@ -117,7 +120,6 @@ def text_classify(text):
         sentence： 整句
         promption_head:  提示头
         part_sentence: 残句
-
     """
     if re.findall(re.compile('：|，|。|？'), text) == []:
         return 'phrase'
@@ -194,20 +196,42 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
         _cur_type = 'part_sentence'
         return True, _cur_text, _cur_type
     # table--table
-    if cur_type in ['table'] and pre_type in ['table']:
+    if cur_type in ['table_trs'] and pre_type in ['table_trs']:
         _cur_text = pre_text + cur_text
-        _cur_type = 'table'
+        _cur_type = 'table_trs'
         return True, _cur_text, _cur_type
+    # other--table
+    # if cur_type in ['table_trs'] and pre_type not in ['table_trs']:
+    #     return True, cur_text, cur_type
     return False, cur_text, cur_type
 
 
 def check_table(type, content):
-    if type not in ['table']:
-        res = {'content': content, 'type': type}
+    """
+        检查数据是否为表格
+    :param type: 
+    :param content: trs_tag 形式
+    :return: 
+    """
+    table_trs = False
+    if type not in ['table_trs']:
+        res = [{'content': content, 'type': type}]
     else:
-        _content = table_processing(content)
-        res = {'content': _content, 'type': type}
-    return res
+        table_trs = True
+        res = []
+        table_list = table_processing(content)
+        if table_list == 'normalize failed':
+            # 转换失败
+            return table_trs, table_list
+        for table in table_list:
+            if table['type'] in ['false_table']:
+                # 假表
+                type = 'sentence'
+                content = table['title']
+                res.append({'content': content, 'type': type})
+                continue
+            res.append({'content': table, 'type': table['type']})
+    return table_trs, res
 
 
 def find_title(tr_dict):
@@ -217,25 +241,28 @@ def find_title(tr_dict):
     :return: 若有 输出 text; 否则 输出 -1
     """
     if tr_dict['n_tds'] == 1:
-        return tr_dict['tr_content'][0][0][0]
+        return tr_dict['tr_content'][0][0, 0]
     else:
         return -1
 
 
 def table_processing(trs_list):
-    table_type = ''
-    title = None  # 表名
+    """
+        对trs以list的形式parser
+    :param trs_list: html tr标签 list
+    :return: 
+    """
+    main_title = ''  # 表名
     tables = []
-    res = {'title': title,
-           'table_type': table_type,
-           'tables': tables}
     # 计算表的基本信息
-    rows = 0
     cols = 0
     trs_content = []
     for i, tr in enumerate(trs_list):
         tr_info = tr_processing(tr)
         cols = max(cols, tr_info['tr_cols'])
+        # 过滤空行
+        if tr_info['tr_text'] in ['', ' ']:
+            continue
         trs_content.append(tr_info)
     # 切表 按行
     _table = []
@@ -250,27 +277,85 @@ def table_processing(trs_list):
         _table.reverse()
         tables.append(_table)  # append最前一个表
     tables.reverse()  # 还原顺序
-
     # 解析表格
     title_append = True # 总标题append开关
     n_subtable = 0
-    for n, table in enumerate(tables):
-        # 寻找总标题
-        if len(table) == 1 and title_append:
-            res['title'] = tables[0][0]['tr_content'][0][0]+res['title']
-            continue
-        else:
+    # 寻找主标题
+    while title_append:
+        if len(tables) == 0: # 表头走完 假表
             title_append = False
-            n_subtable = len(tables)-n # 字表数量
-            # 检查多行子表
-            if n_subtable > 1:
-                res['table_type'] = 'multi_row_tables' # 多行子表
-                return res
-        # 单表解析
-        single_type, single_content = parser_table(table)
-    if n_subtable == 0:
-        res['table_type'] = 'false_table' # 假表 只有title
-    return res
+            continue
+        if len(tables[0]) != 1:  # 遍历完tables
+            title_append = False
+            continue
+        main_title = tables[0][0]['tr_content'][0][0, 0] + main_title
+        tables.pop(0)  # 删除
+    # 检查假表
+    if len(tables) == 0:
+        type = 'false_table'
+        return [{'title': main_title,
+                 'type': type,
+                 'df': main_title}]
+    # 检查多行子表
+    if len(tables) > 1:
+        table_type = 'multi_row_tables'  # 多行子表
+        _tables = []
+        for i in tables: # 合成一张表
+            _tables = _tables + i
+        _table_col = _tables[0]['tr_cols']
+        _table_row = len(_tables)
+        try:
+            _table, trs_letf = trs_formalized(_tables, array_shape=(_table_row, _table_col))
+        except Exception as e:
+            print('the Exception:', e)
+            return 'normalize failed'
+        _table = pd.DataFrame(_table)
+        return [{'title': main_title,
+                 'type': table_type,
+                 'headers': [],
+                 'df': _table}]
+    # 单表解析
+    table_parsed = parser_table(tables[0], main_title)
+    return table_parsed
+
+    # # 解析表格
+    # for n, table in enumerate(tables):
+    #     # 寻找总标题 获取主表名 main_title
+    #     if len(table) == 1 and title_append:
+    #         if main_title == None:
+    #             main_title = tables[0][0]['tr_content'][0][0, 0]
+    #         else:
+    #             main_title = tables[0][0]['tr_content'][0][0, 0]+main_title
+    #         continue
+    #     else:
+    #         title_append = False
+    #         n_subtable = len(tables)-n # 字表数量
+    #         # 检查多行子表
+    #         if n_subtable >1:
+    #             table_type = 'multi_row_tables' # 多行子表
+    #             _table_col = table[0]['tr_cols']
+    #             _table_row = len(table)
+    #             try:
+    #                 _table, trs_letf = trs_formalized(table, array_shape=(_table_row, _table_col))
+    #             except Exception as e:
+    #                 print('the Exception:', e)
+    #                 return 'normalize failed'
+    #             _table = pd.DataFrame(_table)
+    #             return [{'title': main_title,
+    #                     'type': table_type,
+    #                      'headers': [],
+    #                      'df': _table}]
+    #     # 单表解析
+    #     table_parsed = parser_table(table, main_title)
+    #     if table_parsed == 'normalize failed':
+    #         # 转换失败
+    #         return table_parsed
+    #
+    #
+    # # 完全分割的单表list
+    # table_list = table_parsed
+    # # table_type = 'complete_tables'
+    # return table_list
 
 
 def tr_processing(tr):
@@ -279,13 +364,13 @@ def tr_processing(tr):
     :param tr: tag 行
     :return: 字典
     """
-    print('good boy')
     tr_most_rowspan = 1 # 最大跨行数
     tr_most_colspan = 1 # 最大跨列数
     tds = tr.find_all('td')
     n_tds = len(tds)  # 行所含单元格数
-    tr_content = []  # 行各单元内容
+    tr_content = []  # 行各单元内容 list
     tr_type = []  # 行各单元格数据类型
+    tr_text = tr.get_text() # tr的get.text
     tr_cols = 0  # 行长度
     count_tr_colspan = 0  # colspan大于1的td个数统计
     for td in tds:
@@ -299,6 +384,7 @@ def tr_processing(tr):
         tr_cols = tr_cols+data['td_colspan']
         if data['td_colspan'] > 1:
             count_tr_colspan += 1
+
     if count_tr_colspan == n_tds:
         all_has_multi_colspan = True
     else:
@@ -308,7 +394,8 @@ def tr_processing(tr):
            'n_tds': n_tds,
            'all_has_multi_colspan': all_has_multi_colspan,
            'tr_content': tr_content,
-           'tr_cols': tr_cols}
+           'tr_cols': tr_cols,
+           'tr_text': tr_text}
     return res
 
 
@@ -318,6 +405,11 @@ def td_processing(td):
     :param td: tag 单元格
     :return: 字典包括以下：
         内容 类型 跨列 跨行
+        res: 
+           'td_content': ndarray,
+           'td_type': str,
+           'td_colspan': int,
+           'td_rowspan': int
     """
     td_rowspan = 1
     td_colspan = 1
@@ -325,8 +417,10 @@ def td_processing(td):
         td_rowspan = int(td['rowspan'])
     if td.has_attr('colspan'):
         td_colspan = int(td['colspan'])
+    # -单元格原始text提取
+    text = td.get_text()
     # -填充空单元格
-    if td.text == '':
+    if td.get_text() == '':
         td_text = '---'
     else:
         td_text = td.text
@@ -336,8 +430,40 @@ def td_processing(td):
     res = {'td_content': td_content,
            'td_type': td_type,
            'td_colspan': td_colspan,
-           'td_rowspan': td_rowspan}
+           'td_rowspan': td_rowspan,
+           'td_text': text}
     return res
+
+
+def trs_formalized(trs_dict, array_shape):
+    """
+        填表
+    :param trs_dict: dict trs字典对象 自定义 
+    :param array_shape:  tuple 需要填充的table的shape
+    :return: 
+            outarray: np.array 填充完成的数组
+            table: 剩余的trs_dict
+    """
+    out_array = np.empty(shape=array_shape, dtype='object')
+    i = 0
+    j = 0
+    table = copy.deepcopy(trs_dict)
+    while None in out_array:
+        _tr = table[0]
+        table.pop(0)
+        for td in _tr['tr_content']:
+            end_i = td.shape[0] + i
+            end_j = td.shape[1] + j
+            out_array[i:end_i, j:end_j] = td
+            # 定位下一个空单元格
+            _next_cell = cell_location(out_array, out_array.shape[0], out_array.shape[1])
+            if _next_cell == 'filling_full':
+                # 填完array
+                break
+            # 更新坐标
+            i = _next_cell[0]
+            j = _next_cell[1]
+    return out_array, table
 
 
 def cell_text_type(s):
@@ -366,70 +492,82 @@ def cell_location(_np_array, n_row, n_col):
             j = 0
             i += 1
         if i >= n_row:
-            return 'complete'
+            return 'filling_full'
     return [i, j]
 
 
-def parser_table(trs_dict):
+def parser_table(trs_dict, main_title):
     """
         单表解析
     :param trs_text:
     :return:
     """
     title = ''
-    type = ''
     content = []
-    check_multi_col_tables = False
+    # print('parser')
     # 找title
-    title = find_title(trs_dict[0])
-    if title != -1:
-        trs = trs_dict[1:]
-    # 检查多列子表
+    if find_title(trs_dict[0]) != -1:
+        title = find_title(trs_dict[0])
+        trs_dict.pop(0)
+    # 合并title
+    main_title = main_title + title
+    # 检查多列子表 和 单表
     _tr = trs_dict[0]
     if _tr['all_has_multi_colspan'] and _tr['tr_most_rowspan'] == 1:
         type = 'multi_col_tables'  # 多列子表
-        tables = []
-        return type, content
+        _table_col = _tr['tr_cols'] # 列
+        _table_row = len(trs_dict) # 行
+        try:
+            # 转换失败
+            _table, _trs_left = trs_formalized(trs_dict, array_shape=(_table_row, _table_col))
+        except Exception as e:
+            print('the Exception:', e)
+            return 'normalize failed'
+        _table = pd.DataFrame(_table)
+        return [{'title': main_title,
+                 'type': type,
+                 'headers': [],
+                 'df': _table}]
     else:
         tables = [trs_dict]
-    # 处理单表
+        type = 'single_table'
+    # 处理单表 可能是多个表并列而成 遍历每个表
     for table in tables:
         # 找子表名
-        _title = find_title(table[0])
-        if _title == -1 and title == -1:
-            sub_title = -1
-        if _title == -1 and title != -1:
-            sub_title = title
-        if _title != -1 and title != -1:
-            sub_title = title+_title
-            table = table[1:]
-        if _title != -1 and title == -1:
-            sub_title = _title
-            table = table[1:]
-        # 找 headers
-        _tr = table[0]
-        n_col = _tr['tr_cols']  # 矩阵列数
-        headers_array = np.empty(shape=(_tr['tr_most_rowspan'], _tr['tr_cols']), dtype='object')
-        i = 0
-        j = 0
-        while None in headers_array:
-            _tr = table[0]
+        _title = ''
+        if find_title(table[0]) != -1:
+            _title = find_title(table[0])
             table.pop(0)
-            print('- - '*20)
-            print(_tr['tr_content'])
-            for td in _tr['tr_content']:
-                end_i = td.shape[0]+i
-                end_j = td.shape[1]+j
-                headers_array[i:end_i, j:end_j] = td
-                # 定位下一个空单元格
-                print(headers_array)
-                _next_cell = cell_location(headers_array, headers_array.shape[0], headers_array.shape[1])
-                if _next_cell == 'complete':
-                    # 填完array
-                    break
-                # 更新坐标
-                i = _next_cell[0]
-                j = _next_cell[1]
+        sub_title = main_title+_title
+        # 找 headers
+        _tr = table[0] # 取首列 定大小
+        n_col = _tr['tr_cols']  # 矩阵列数
+        try:
+            headers_array, table = trs_formalized(table, array_shape=(_tr['tr_most_rowspan'], _tr['tr_cols']))
+        except Exception as e:
+            print('the Exception:', e)
+            return 'normalize failed'
+        # i = 0
+        # j = 0
+        # while None in headers_array:
+        #     _tr = table[0]
+        #     table.pop(0)
+        #     print('- - '*20)
+        #     print(_tr['tr_content'])
+        #     for td in _tr['tr_content']:
+        #         end_i = td.shape[0]+i
+        #         end_j = td.shape[1]+j
+        #         headers_array[i:end_i, j:end_j] = td
+        #         # 定位下一个空单元格
+        #         print(headers_array)
+        #         _next_cell = cell_location(headers_array, headers_array.shape[0], headers_array.shape[1])
+        #         if _next_cell == 'complete':
+        #             # 填完array
+        #             break
+        #         # 更新坐标
+        #         i = _next_cell[0]
+        #         j = _next_cell[1]
+
         # headers 按行合并
         _headers_list = []
         for i in headers_array.T:
@@ -441,72 +579,231 @@ def parser_table(trs_dict):
         # 找 table
         table_row = len(table)
         table_col = headers_array.shape[1]
-        table_array = np.empty(shape=(table_row, table_col), dtype='object')
-        i = 0
-        j = 0
-        while None in table_array:
-            _tr = table[0]
-            table.pop(0)
-            for td in _tr['tr_content']:
-                end_i = td.shape[0]+i
-                end_j = td.shape[1]+j
-                table_array[i:end_i, j:end_j] = td
-                # 定位下一个空单元格
-                print(headers_array)
-                _next_cell = cell_location(table_array, table_array.shape[0], table_array.shape[1])
-                if _next_cell == 'complete':
-                    # 填完array
-                    break
-                # 更新坐标
-                i = _next_cell[0]
-                j = _next_cell[1]
+        # table_array = np.empty(shape=(table_row, table_col), dtype='object')
+        try:
+            table_array, table = trs_formalized(table, array_shape=(table_row, table_col))
+        except Exception as e:
+            print('the Exception:', e)
+            return 'normalize failed'
+        # i = 0
+        # j = 0
+        # while None in table_array:
+        #     _tr = table[0]
+        #     table.pop(0)
+        #     for td in _tr['tr_content']:
+        #         end_i = td.shape[0]+i
+        #         end_j = td.shape[1]+j
+        #         table_array[i:end_i, j:end_j] = td
+        #         # 定位下一个空单元格
+        #         print(headers_array)
+        #         _next_cell = cell_location(table_array, table_array.shape[0], table_array.shape[1])
+        #         if _next_cell == 'complete':
+        #             # 填完array
+        #             break
+        #         # 更新坐标
+        #         i = _next_cell[0]
+        #         j = _next_cell[1]
         # headers 按列合并
-        _table_array = np.empty(shape=(table_array.shape[0], table_array.shape[1]), dtype='object')
-        _t_array = np.vstack((np.array(_headers_list), _table_array))
-        t_array = np.array()
-        for head in _headers_list:
-            if t_array.shape == (0, ):
-                t_array = np.vstack()
+        df = pd.DataFrame()
+        for i, head in enumerate(_headers_list):
+            if head in df.columns:
+                print(head)
+                new_col = []
+                for i in zip(df[head], table_array[:, i].astype(np.str)):
+                    if i[0] == i[1]:
+                        new_col.append(i[0])
+                    else:
+                        new_col.append(i[0]+'-'+i[1])
+                df[head] = new_col
+                # df[head] = df[head] + '-' + table_array[:, i].astype(np.str)
+            else:
+                df[head] = table_array[:, i].astype(np.str)
+        # m = df.to_json()
+        # n = json.loads(m)
+        # p = pd.DataFrame(n)
+        content.append({'title': sub_title,
+                        'type': type,
+                        'headers': _headers_list,
+                        'df': df})
+    # print('*  *  '*10)
+    # print(content)
+    return content
 
 
+def check_title_merge(pre_content, content):
+    """
+        检查title合并
+    :param pre_content: 不是当前tr的pre_content 而是pre_pre_content
+    :param content: table_dict_list
+    :return: 
+    """
+    if pre_content['type'] == 'promption_head':
+        pre_title = pre_content['content']
+    else:
+        return content
+    res = []
+    for t in content:
+        # 处理假表
+        if t['type'] == 'sentence':
+            res.append(t)
+            continue
+        _table_dict = t['content']
+        _table_dict['title'] = pre_title + '-' + _table_dict['title']
+        res.append({'content': _table_dict, 'type': _table_dict['type']})
+        # # print(_table_dict)
+        # # try:
+        # #     print(_table_dict['title'] == -1)
+        # # except:
+        # #     print('ok')
+        # try:
+        #     _table_dict['title'] == -1
+        # except:
+        #     print('ok')
+        # if _table_dict['title'] == -1:
+        #     _table_dict['title'] = pre_title
+        # else:
+        #     if pre_title != -1:
+        #         _table_dict['title'] = pre_title+'-'+_table_dict['title']
+        # res.append({'content': _table_dict, 'type': _table_dict['type']})
+    return res
 
-    return
+
+def html_to_tags_list(html, _from='inner'):
+    """
+        原始html格式转换
+    :param html: beautifulsoup 
+    :param _from: str 文件来源
+    :return: 
+    """
+    if _from=='inner':
+        # 内部商用软件转换
+        body = html.body
+        content_tags = body.find_all(True, recursive=False)
+        return content_tags
 
 
-def get_content(html):
-    body = html.body
-    content_tags = body.find_all(re.compile('table|p'), recursive=False)
-    # print(content_tags)
+def get_content(tags_list):
+    file_failed = [] # 转换失败的名单
     contents = []
     pre_content = ''  # 之前的content
     pre_type = ''  # 之前的content 类型
     cur_content = ''  # 当前的content
     cur_type = ''  # 之前的content 类型
-    for i in content_tags:
+    for j, i in enumerate(tags_list):
         # 滤过不含text和表格的 div
         t = i.find_all(text=True)
         if t == []:
             continue
         # tag 分类
-        cur_type, cur_content = content_classify(i)
-        print(cur_type)
+        cur_type, cur_content = content_classify(i) # cur_content 包含tr 形式的 table --'table_trs'
+        # print(cur_type)
         # 检查合并
         ismerge, cur_content, cur_type = check_merge(pre_type, cur_type, cur_content, pre_content)
+        # print('---------------------------')
+        # print(ismerge)
+        # print('pre_type: ', pre_type, '   cur_type: ', cur_type)
+        # print('####')
+        # print('cur:')
+        # print(cur_content)
+        # print('####')
+        # print('pre:')
+        # print(pre_content)
+        _pre_content = cur_content
+        _pre_type = cur_type
+        # append 最后一行
         if not ismerge:
-            content = check_table(pre_type, pre_content)
-            contents.append(copy.deepcopy({'content': content, 'type': pre_type}))
-        pre_content = cur_content
-        pre_type = cur_type
-    contents.append({'content': cur_content, 'type': cur_type})
+            is_trans_table_trs, content = check_table(pre_type, pre_content)
+            if content == 'normalize failed':
+                # 转换失败
+                file_failed.append(pre_content)
+                # 更新当前记录器
+                pre_type = _pre_type
+                pre_content = _pre_content
+                continue
+            # print(content[0]['type'])
+            # print(len(content))
+            if is_trans_table_trs: # 是否需要转换表格
+                if contents != []:
+                    _content = check_title_merge(contents[-1], content) # 合并title
+                else:
+                    _content = content
+                # _pre_content = _content[-1]['content'] error
+                # _pre_type = _content[-1]['type'] error
+            else:
+                _content = content
+                # _pre_content = cur_content error
+                # _pre_type = cur_type error
+            contents = contents + _content
+        pre_type = _pre_type
+        pre_content = _pre_content
+
+    if cur_type == 'table_trs':
+        is_trans_table_trs, content = check_table(cur_type, cur_content)
+        if contents != []:
+            _content = check_title_merge(contents[-1], content)
+        else:
+            _content = content
+    else:
+        _content = [{'content': cur_content, 'type': pre_type}]
+    contents = contents + _content
     return contents
 
+
+def check_table_write(content):
+    """
+        打印表格， 目前仅支持打印单表
+                        {'title': sub_title,
+                         'type': type,
+                         'headers': _headers_list,
+                         'df': df}
+    :param content: 
+    :return: 
+    """
+    res = []
+    # 打印单表 single_table
+    if content['type'] in ['single_table']:
+        res.append('#--table---')
+        _content = content['content']
+        res.append('type:{0}'.format(_content['type']))
+        if _content['title'] != -1:
+            res.append('-  title  - {0}'.format(_content['title']))
+        else:
+            res.append('-  title  - {0}'.format('None'))
+        res.append('headers:' + '  |  '.join(_content['headers']))
+        table = _content['df'].astype('str').values.tolist()
+        _table = ['  |  '.join(i) for i in table]
+        res = res + _table
+        res.append('#--table---')
+        return res
+    # 杂表
+    if content['type'] in ['multi_col_tables', 'multi_row_tables']:
+        res.append('#--table---')
+        _content = content['content']
+        res.append('type:{0}'.format(_content['type']))
+        if _content['title'] != -1:
+            res.append('-  title  - {0}'.format(_content['title']))
+        else:
+            res.append('-  title  - {0}'.format('None'))
+        try:
+            table = _content['df'].astype('str').values.tolist()
+        except:
+            pass
+        _table = ['  |  '.join(i) for i in table]
+        res = res + _table
+        res.append('#--table---')
+        return res
+    # 其他
+    return [content['content']]
+        
 
 if __name__ == '__main__':
     file_info = get_path_args()
     html_dict = read_html2(filepath=file_info['file_path'], filename=file_info['file_name'])
     contents = {}
-    for index in html_dict:
-        content = get_content(html_dict[index])
+    for n, index in enumerate(html_dict):
+        print('processing {0} -- total: {1} this: {2}'.format(index, len(html_dict), n))
+        tags_list = html_to_tags_list(html=html_dict[index], _from='inner')
+        content = get_content(tags_list)
         contents[index] = content
         """
         contents example:
@@ -519,10 +816,12 @@ if __name__ == '__main__':
         # 有表格返回的是空值，跳过
         if contents[index] == None:
             continue
-        with codecs.open(file_info['save_path']+index+'.txt', 'w', 'utf-8') as f:
-            print('--- writing {0}'.format(index+'.txt'))
-            output = [i['content'] for i in contents[index]]
-            f.writelines('\n'.join(output))
+        with codecs.open(file_info['save_path'] + index.replace('.html', '.txt'), 'w', 'utf-8') as f:
+            print('--- writing {0}'.format(index + '.txt'))
+            output = []
+            for i in contents[index]:
+                output = output + check_table_write(i)
+            f.write('\n'.join(output))
 
 
     # with codecs.open('./data/temp/20526259.html', 'r', 'utf-8') as f:
