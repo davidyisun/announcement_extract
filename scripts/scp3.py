@@ -148,7 +148,7 @@ def tianchi_html_to_text_complete(drop_table=True):
             for i in h.find_all('table'):
                 i.decompose()
         content = th.get_content(h)
-        content = th.content_format(content)
+        content, part_table, table_failed = th.content_format(content)
         contents[index] = content
     # 写入txt
     for index in contents:

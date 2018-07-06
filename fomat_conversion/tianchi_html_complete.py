@@ -60,7 +60,7 @@ def read_html2(filepath, filename=None):
 
 def get_content(tag):
     """
-        获取text信息z
+        获取text信息 递归
     :param tag: 
     :return: 
     """
@@ -80,8 +80,11 @@ def get_content(tag):
         # 检查表格
         tables = tag.find_all('table', recursive=False)
         if tables != [] and tables[0].get_text() != '':
-            _table = tables[0].tbody.find_all('tr')
-            contents.append(_table)
+            try:  # 奇葩的非表格 table
+                _content = tables[0].tbody.find_all('tr')
+            except:
+                _content = tables[0].get_text()
+            contents.append(_content)
             return contents
         # 没有文字
         if tag.find_all(text=True) == []:
@@ -98,7 +101,8 @@ def get_content(tag):
 
 
 def content_format(tags_list):
-    file_failed = [] # 转换失败的名单
+    part_table = False # 是否有残表
+    file_failed = [] # 残表名单
     contents = []
     pre_content = ''  # 之前的content
     pre_type = ''  # 之前的content 类型
@@ -125,6 +129,7 @@ def content_format(tags_list):
             is_trans_table_trs, content = check_table(pre_type, pre_content)
             if content == 'normalize failed':
                 # 转换失败
+                part_table = True
                 file_failed.append(pre_content)
                 # 更新当前记录器
                 pre_type = _pre_type
@@ -156,7 +161,8 @@ def content_format(tags_list):
     else:
         _content = [{'content': cur_content, 'type': pre_type}]
     contents = contents + _content
-    return contents
+    return contents, part_table, file_failed
+
 
 def content_classify(tag):
     """
@@ -251,16 +257,16 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
         _cur_text = pre_text+cur_text
         _cur_type = 'complete_promption'
         return True, _cur_text, _cur_type
-    # 提示head--短语、整句
-    if cur_type in ['phrase', 'sentence'] and pre_type == 'promption_head':
-        _cur_text = pre_text+cur_text
-        _cur_type = 'complete_promption'
-        return True, _cur_text, _cur_type
+    # # 提示head--短语、整句
+    # if cur_type in ['phrase', 'sentence'] and pre_type == 'promption_head':
+    #     _cur_text = pre_text+cur_text
+    #     _cur_type = 'complete_promption'
+    #     return True, _cur_text, _cur_type
     # 提示head--残句
-    if cur_type in ['part_sentence'] and pre_type == 'promption_head':
-        _cur_text = pre_text+cur_text
-        _cur_type = 'part_sentence'
-        return True, _cur_text, _cur_type
+    # if cur_type in ['part_sentence'] and pre_type == 'promption_head':
+    #     _cur_text = pre_text+cur_text
+    #     _cur_type = 'part_sentence'
+    #     return True, _cur_text, _cur_type
     # table--table
     if cur_type in ['table_trs'] and pre_type in ['table_trs']:
         try:
@@ -420,12 +426,12 @@ def td_processing(td):
     if td.has_attr('colspan'):
         td_colspan = int(td['colspan'])
     # -单元格原始text提取
-    text = td.get_text()
+    text = td.get_text().replace(' ', '')
     # -填充空单元格
-    if td.get_text() == '':
+    if text == '':
         td_text = '---'
     else:
-        td_text = td.text
+        td_text = text
     td_type = np.array([[cell_text_type(td_text)] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     td_content = np.array([[td_text] * td_colspan] * td_rowspan).reshape(td_rowspan, td_colspan)
     res = {'td_content': td_content,
@@ -643,6 +649,7 @@ def check_table(type, content):
                 res.append({'content': content, 'type': type})
                 continue
             res.append({'content': table, 'type': table['type']})
+        pass
     return table_trs, res
 
 
@@ -711,7 +718,7 @@ if __name__ == '__main__':
             i.decompose()
         content = get_content(h)
         content = [re.sub(' +', '', i) for i in content]
-        content = content_format(content)
+        content, part_table, table_failed = content_format(content)
         content = [i['content'] for i in content]
         with codecs.open(file_info['save_path']+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
             print('--- writing {0}'.format(index.replace('.html', '.txt')))
