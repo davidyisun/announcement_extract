@@ -9,7 +9,7 @@ Created on 2018-07-02
 """
 from bs4 import BeautifulSoup
 def t():
-    import demo_complete as dc
+    from fomat_conversion import demo_complete as dc
     filepath = './data/temp/'
     filename = '1142820.html'
     html_dict =dc.read_html2(filepath, filename)
@@ -25,7 +25,7 @@ def test_table():
         表格处理模块测试
     :return: 
     """
-    import demo_complete as dc
+    from fomat_conversion import demo_complete as dc
     t1 = '<table border="1"> <tr><td rowspan="2" style="vertical-align:middle;"> <p><span class="font3">股东名称</span></p></td><td rowspan="2" style="vertical-align:middle;"> <p><span class="font3">减持方式</span></p></td><td rowspan="2" style="vertical-align:middle;"> <p><span class="font3">减持时间期间</span></p></td><td colspan="2" style="vertical-align:bottom;"> <p><span class="font3">本次减持股份</span></p></td></tr> <tr><td style="vertical-align:bottom;"> <p><span class="font3">股数（万股）</span></p></td><td style="vertical-align:bottom;"> <p><span class="font3">占总股本比例</span></p></td></tr> <tr><td rowspan="3" style="vertical-align:middle;"> <p><span class="font3">惠州市德赛工业发展</span></p> <p><span class="font3">有限公司</span></p></td><td style="vertical-align:middle;"> <p><span class="font3">集中竞价交易</span></p></td><td style="vertical-align:middle;"> <p><span class="font2">2010 </span><span class="font3">年 </span><span class="font2">8 </span><span class="font3">月 </span><span class="font2">19 </span><span class="font3">日至</span></p> <p><span class="font2">2012</span><span class="font3">年</span><span class="font2">5</span><span class="font3">月</span><span class="font2">18</span><span class="font3">日</span></p></td><td style="vertical-align:middle;"> <p><span class="font2">191.56</span></p></td><td style="vertical-align:middle;"> <p><span class="font2">1.4%</span></p></td></tr> <tr><td style="vertical-align:bottom;"> <p><span class="font3">大宗交易</span></p></td><td> <p></p></td><td> <p></p></td><td> <p></p></td></tr> <tr><td style="vertical-align:bottom;"> <p><span class="font3">其它方式</span></p></td><td> <p></p></td><td> <p></p></td><td> <p></p></td></tr> </table>'
     table = BeautifulSoup(t1, 'lxml')
     trs = table.find_all('tr')
@@ -67,7 +67,7 @@ def html_to_test():
 
 
 def table_to_txt_test():
-    import demo_complete as dc
+    from fomat_conversion import demo_complete as dc
     import codecs
     path = './data/data_train_shifeng_html/增减持/html/'
     filename = None
@@ -129,15 +129,14 @@ def tianchi_html_to_text_complete(drop_table=True):
     :param drop_table: 
     :return: 
     """
-    import tianchi_html_complete as th
-    import re
+    from fomat_conversion import tianchi_html_complete as th
     import codecs
-    path = './data/0605/增减持/html/'
+    path = '../data/0605/增减持/html/'
     filename = None
-    outpath = './data/0605_txt/增减持/'
-    # path = './data/0605/增减持/html/'
-    # filename = '278906.html'
-    # outpath = './data/temp/'
+    outpath = '../data/0605_txt/增减持/'
+    path = '../data/0605/增减持/html/'
+    filename = '278906.html'
+    outpath = '../data/temp/'
     html_dict = th.read_html2(filepath=path, filename=filename)
     total = 0
     contents = {}

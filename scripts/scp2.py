@@ -7,7 +7,7 @@ Created on 2018--
 @group:data
 @contact:davidhu@wezhuiyi.com
 """
-from demo_txt import *
+from fomat_conversion.demo_txt import *
 
 file_info = get_path_args()
 txt_dict = read_txt(filepath='./data/data_txt/major_contracts/', filename='2379.txt')
