@@ -22,8 +22,8 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '20596308.html'
-    # outpath = './data/temp/'
+    # filename = '170914.html'
+    outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
     for n, index in enumerate(html_dict):
@@ -112,6 +112,21 @@ def _groupby_fun2(df):
         if df.shape[0] > 1 and amount_ratio_later.shape[0] == 1:
             data['amount_ratio_later'][data['date'] != data['date'].max()] = np.nan
     return data
+
+
+def date_transform(date_str):
+    """
+        时间格式转换
+    :param date_str:
+    :return:
+    """
+    res = date_str
+    date = re.findall(r'\d{4}[年\.-]\d{1,2}[月\.-]\d*日*|\d{4}/\d{1,2}/\d*日*', date_str)
+    if len(date) != 0:
+        res = date [-1]
+    res = re.sub(re.compile(r'日|月|年|\.|/'), '-', res)
+    return res
+
 def tables_merge(tables):
     """
         多表合并
@@ -148,7 +163,7 @@ def tables_merge(tables):
                     # 含股东名字段 且 含有 股份性质
                     if 'share_nature' in _t.columns:
                         # 按股东分组抽取数据
-                        _other_table = _t.groupby('share_nature').apply(_groupby_fun1)
+                        _other_table = _t.groupby('holders').apply(_groupby_fun1)
                         # _other_table = _t[_t['share_nature'].str.contains('合计')]
                         _other_table = _other_table.reset_index(drop=True)
                     else:
@@ -163,11 +178,7 @@ def tables_merge(tables):
         return [date_table, 'no_holders']
     # 整理表格内部结构 --日期
     date_list = date_table['date'].tolist()
-    try:
-        date = list(map(lambda x: re.findall(r'\d{4}[年\.-]\d{1,2}[月\.-]\d*日*|\d{4}/\d{1,2}/\d*日*', x)[-1], date_list))
-    except:
-        pass
-    date = [re.sub(re.compile(r'日|月|年|\.'), '-', i) for i in date]
+    date = list(map(date_transform, date_list))
     date_table['date'] = date
     # 整理表格内部结构 --价格
     # 按股东聚合
