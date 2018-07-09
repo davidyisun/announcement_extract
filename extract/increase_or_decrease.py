@@ -15,13 +15,14 @@ import copy
 
 # 获取数据
 def get_content(has_table=True):
-    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    filename = None
-    outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '100829.html'
-    # outpath = './data/temp/'
     path = '/data/hadoop/yisun/data/tianchi/train_data/增减持/html/'  # 220 地址
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    filename = None
+    # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
+    # 本地测试
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    # filename = '16656701.html'
+    # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
     for n, index in enumerate(html_dict):
@@ -73,7 +74,7 @@ def extract_table(table_dict):
     data = data.dropna(axis=1) # 删除空列
     # 标记含主键的表格
     has_key = False
-    if 'date' in data:
+    if 'date' in data and data.shape[0] != 0:
         has_key = True
     return [data, has_key]
 
@@ -101,23 +102,23 @@ def tables_merge(tables):
 
 def main():
     res, total, has_table = get_content(True)
-    result = {}
+    result1 = {}
     result2 = {}
     for n, index in enumerate(res):
         contents = res[index][0]
         name = index.replace('.html', '')
-        result[name] = []
+        result1[name] = []
         for content in contents:
             if content['type'] in ['single_table']:
                 # 提取信息
                 data = extract_table(content['content'])
-                result[name].append(data)
-        result2[name] = tables_merge(result[name])
-    return result2
+                result1[name].append(data)
+        result2[name] = tables_merge(result1[name])
+    return result1, result2
 
 
 if __name__ == '__main__':
-    res = main()
+    res1, res2 = main()
     pass
 
 
