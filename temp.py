@@ -19,7 +19,7 @@ def t():
     print('multi_keys:{0}'.format(len(data['multi_keys'])))
     print('no_keys:{0}'.format(len(data['no_keys'])))
     print('normal:{0}'.format(len(data['nomarl'])))
-    return
+    return data
 
 if __name__ == '__main__':
     t()
