@@ -35,6 +35,8 @@ def t1():
     data = pd.DataFrame(columns=['index', 'holders', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature'])
     for index in res2:
         if res2[index][1] == 'complete':
+            print('--- together {0}'.format(index))
+            print()
             content = res2[index][0]
             content['index'] = index
             data = pd.merge(data, content, how='outer')

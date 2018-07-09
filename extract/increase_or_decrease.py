@@ -153,11 +153,13 @@ def main():
         contents = res[index][0]
         name = index.replace('.html', '')
         result1[name] = []
+        print('extract {0} -- total: {1} this: {2}'.format(index, len(res), n))
         for content in contents:
             if content['type'] in ['single_table']:
                 # 提取信息
                 data = extract_table(content['content'])
                 result1[name].append(data)
+        print('-----merge ********')
         result2[name] = tables_merge(result1[name])
     return result1, result2
 
