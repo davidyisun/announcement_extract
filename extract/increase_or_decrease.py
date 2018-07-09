@@ -22,7 +22,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '356373.html'
+    # filename = '100829.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -186,6 +186,7 @@ def tables_merge(tables):
         date_table = date_table.groupby('holders').apply(_groupby_fun2)
     else:
         date_table = _groupby_fun2(date_table)
+    date_table = date_table.reset_index(drop=True)
     #
     # # 整理变动后股份
     # if 'amount_later' in date_table.columns:

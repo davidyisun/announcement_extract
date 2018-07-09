@@ -32,17 +32,19 @@ def t():
 def t1():
     # 统计单表中只含有标准格式的数据
     res1, res2 = id.main()
-    data = pd.DataFrame(columns=['index', 'holders', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature'])
+    headers = ['index', 'holders', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature']
+    data = pd.DataFrame(columns=headers)
     count = 0
     for index in res2:
         if res2[index][1] == 'complete':
             content = res2[index][0]
             content['index'] = index
-            if content.shape[1] != data.shape[1]:
+            if content.shape[1] > len(headers):
                 continue
             data = pd.merge(data, content, how='outer')
             count += 1
             print('--- together {0} --- count {1}'.format(index, count))
+    data.reindex(columns=headers)
     data.to_csv('./zengjianchi_table.csv', index=False)
     return
 if __name__ == '__main__':
