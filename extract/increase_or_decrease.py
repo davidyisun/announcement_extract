@@ -22,7 +22,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '1166115.html'
+    # filename = '20305567.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -51,10 +51,10 @@ def extract_table(table_dict):
     # --- 正则格式为 [匹配， 不匹配]
     reg_date = [re.compile('日期|时间|期间'), re.compile('星星点灯')]
     reg_holders = [re.compile('股东名称|股东姓名'), re.compile('星星点灯')]
-    reg_price = [re.compile('价格|均价|元'), re.compile('星星点灯')]
-    reg_amount = [re.compile('股数|数量'), re.compile('前|后')]
-    reg_amount_later = [re.compile('后持有+.*股数|[增减]持[前后]+.*股数'), re.compile('星星点灯')]
-    reg_amount_ratio_later = [re.compile('后持有+.*比例*|[增减]持[前后]+.*比例'), re.compile('星星点灯')]
+    reg_price = [re.compile('价格|均价|元'), re.compile('总.*额')]
+    reg_amount = [re.compile('股数|数量'), re.compile('前|后|持有*股*数量*')]
+    reg_amount_later = [re.compile('后持有+.*股数量*|[增减]持[前后]+.*股数量*|当前持+.*股数量*'), re.compile('星星点灯')]
+    reg_amount_ratio_later = [re.compile('后持有+.*比例*|[增减]持[前后]+.*比例|当前持+.*比例'), re.compile('星星点灯')]
     reg_method = [re.compile('持方式'), re.compile('星星点灯')]  # 增减持方式
     reg_share_nature = [re.compile('性质'), re.compile('星星点灯')] # 股份性质
     reg_dict = {'date': reg_date,                      # 变动截止日期
@@ -161,11 +161,12 @@ def tables_merge(tables):
         # 没有主键的就直接拼接
             date_table = pd.concat([date_table, _t], axis=1)
         return [date_table, 'no_holders']
-    # 整理表格内部结构
+    # 整理表格内部结构 --日期
     date_list = date_table['date'].tolist()
-    date = list(map(lambda x: re.findall(r'\d{4}[年\.-]\d{1,2}[月\.-]\d*日*', x)[-1], date_list))
+    date = list(map(lambda x: re.findall(r'\d{4}[年\.-/]\d{1,2}[月\.-/]\d*日*', x)[-1], date_list))
     date = [re.sub(re.compile(r'日|月|年|\.'), '-', i) for i in date]
     date_table['date'] = date
+    # 整理表格内部结构 --价格
     # 按股东聚合
     if 'holders' in date_table.columns:
         date_table = date_table.groupby('holders').apply(_groupby_fun2)
