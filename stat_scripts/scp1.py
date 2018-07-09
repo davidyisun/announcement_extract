@@ -14,21 +14,23 @@ def t():
     normal = []
     negative = {}
     neg_part_table = {} # 负样本中的残表
-    stat =['股东名称']
+    stat =['元|均价|价格']
     reg = re.compile(stat[0])
     for index in res:
         satisfied = False  # 是否满足条件
         contents = res[index][0]
         part_table = res[index][1]
+        tables = []
         for content in contents:
             if content['type'] in ['single_table', 'multi_col_tables', 'multi_row_tables']:
                 table = content['content']
+                tables.append(table)
                 headers = [i.strip() for i in table['headers'] if re.search(reg, i.strip()) != None]
                 if headers != []:
                     satisfied = True
                     normal.append(index)
         if satisfied == False and not part_table:
-            negative[index] = contents
+            negative[index] = tables
         if satisfied == False and part_table:
             neg_part_table[index] = contents
     print('总公告数:{0}'.format(total))
