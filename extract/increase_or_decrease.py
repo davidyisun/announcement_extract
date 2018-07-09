@@ -21,8 +21,8 @@ def get_content(has_table=True):
     filename = None
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '20305567.html'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    filename = '20596308.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -163,7 +163,10 @@ def tables_merge(tables):
         return [date_table, 'no_holders']
     # 整理表格内部结构 --日期
     date_list = date_table['date'].tolist()
-    date = list(map(lambda x: re.findall(r'\d{4}[年\.-/]\d{1,2}[月\.-/]\d*日*', x)[-1], date_list))
+    try:
+        date = list(map(lambda x: re.findall(r'\d{4}[年\.-]\d{1,2}[月\.-]\d*日*|\d{4}/\d{1,2}/\d*日*', x)[-1], date_list))
+    except:
+        pass
     date = [re.sub(re.compile(r'日|月|年|\.'), '-', i) for i in date]
     date_table['date'] = date
     # 整理表格内部结构 --价格
