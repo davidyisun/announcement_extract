@@ -15,6 +15,12 @@ def t():
             'normal': []}
     for index in res:
         data[res[index]].append(index)
+    print('multi_keys:')
+    print(data['multi_keys'])
+    print('—'*20)
+    print('no_keys:')
+    print(data['no_keys'])
+    print('—'*20)
     print('total:{0}'.format(len(res)))
     print('multi_keys:{0}'.format(len(data['multi_keys'])))
     print('no_keys:{0}'.format(len(data['no_keys'])))
