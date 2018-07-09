@@ -21,8 +21,8 @@ def get_content(has_table=True):
     filename = None
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '100829.html'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    filename = '1166115.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -52,9 +52,9 @@ def extract_table(table_dict):
     reg_date = [re.compile('日期|时间|期间'), re.compile('星星点灯')]
     reg_holders = [re.compile('股东名称|股东姓名'), re.compile('星星点灯')]
     reg_price = [re.compile('价格|均价|元'), re.compile('星星点灯')]
-    reg_amount = [re.compile('股数'), re.compile('前|后')]
-    reg_amount_later = [re.compile('后持有+.*股数'), re.compile('星星点灯')]
-    reg_amount_ratio_later = [re.compile('后持有+.*比例*'), re.compile('星星点灯')]
+    reg_amount = [re.compile('股数|数量'), re.compile('前|后')]
+    reg_amount_later = [re.compile('后持有+.*股数|[增减]持[前后]+.*股数'), re.compile('星星点灯')]
+    reg_amount_ratio_later = [re.compile('后持有+.*比例*|[增减]持[前后]+.*比例'), re.compile('星星点灯')]
     reg_method = [re.compile('持方式'), re.compile('星星点灯')]  # 增减持方式
     reg_share_nature = [re.compile('性质'), re.compile('星星点灯')] # 股份性质
     reg_dict = {'date': reg_date,                      # 变动截止日期
@@ -80,6 +80,38 @@ def extract_table(table_dict):
     return [data, has_key]
 
 
+def _groupby_fun1(df):
+    """
+        股份性质的聚合函数
+    :param df:
+    :return:
+    """
+    d = df[df['share_nature'].str.contains('合计')]
+    if d.shape[0] != 0:
+        data = d.copy()
+    else:
+        data = df.copy()
+    return data
+
+
+def _groupby_fun2(df):
+    """
+        变动后持股数和比例的聚合函数
+    :param df:
+    :return:
+    """
+    data = df.copy()
+    # 整理变动后股份
+    if 'amount_later' in df.columns:
+        amount_later = df['amount_later'].value_counts()
+        if df.shape[0] > 1 and amount_later.shape[0] == 1:
+            data['amount_later'][data['date'] != data['date'].max()] = np.nan
+    # 整理变动后占比的信息
+    if 'amount_ratio_later' in df.columns:
+        amount_ratio_later = df['amount_ratio_later'].value_counts()
+        if df.shape[0] > 1 and amount_ratio_later.shape[0] == 1:
+            data['amount_ratio_later'][data['date'] != data['date'].max()] = np.nan
+    return data
 def tables_merge(tables):
     """
         多表合并
@@ -115,7 +147,9 @@ def tables_merge(tables):
                 if 'holders' in _t.columns:
                     # 含股东名字段 且 含有 股份性质
                     if 'share_nature' in _t.columns:
-                        _other_table = _t[_t['share_nature'].str.contains('合计')]
+                        # 按股东分组抽取数据
+                        _other_table = _t.groupby('share_nature').apply(_groupby_fun1)
+                        # _other_table = _t[_t['share_nature'].str.contains('合计')]
                         _other_table = _other_table.reset_index(drop=True)
                     else:
                         _other_table = _t
@@ -132,16 +166,22 @@ def tables_merge(tables):
     date = list(map(lambda x: re.findall(r'\d{4}[年\.-]\d{1,2}[月\.-]\d*日*', x)[-1], date_list))
     date = [re.sub(re.compile(r'日|月|年|\.'), '-', i) for i in date]
     date_table['date'] = date
-    # 整理变动后股份
-    if 'amount_later' in date_table.columns:
-        amount_later = date_table['amount_later'].value_counts()
-        if date_table.shape[0] > 1 and amount_later.shape[0] == 1:
-            date_table['amount_later'][date_table['date'] != date_table['date'].max()] = np.nan
-    # 整理变动后占比的信息
-    if 'amount_ratio_later' in date_table.columns:
-        amount_ratio_later = date_table['amount_ratio_later'].value_counts()
-        if date_table.shape[0] > 1 and amount_ratio_later.shape[0] == 1:
-            date_table['amount_ratio_later'][date_table['date'] != date_table['date'].max()] = np.nan
+    # 按股东聚合
+    if 'holders' in date_table.columns:
+        date_table = date_table.groupby('holders').apply(_groupby_fun2)
+    else:
+        date_table = _groupby_fun2(date_table)
+    #
+    # # 整理变动后股份
+    # if 'amount_later' in date_table.columns:
+    #     amount_later = date_table['amount_later'].value_counts()
+    #     if date_table.shape[0] > 1 and amount_later.shape[0] == 1:
+    #         date_table['amount_later'][date_table['date'] != date_table['date'].max()] = np.nan
+    # # 整理变动后占比的信息
+    # if 'amount_ratio_later' in date_table.columns:
+    #     amount_ratio_later = date_table['amount_ratio_later'].value_counts()
+    #     if date_table.shape[0] > 1 and amount_ratio_later.shape[0] == 1:
+    #         date_table['amount_ratio_later'][date_table['date'] != date_table['date'].max()] = np.nan
     return [date_table, 'complete']
 
 
@@ -158,6 +198,9 @@ def main():
             if content['type'] in ['single_table']:
                 # 提取信息
                 data = extract_table(content['content'])
+                # 空表继续
+                if data[0].shape[0] == 0:
+                    continue
                 result1[name].append(data)
         print('-----merge ********')
         result2[name] = tables_merge(result1[name])
