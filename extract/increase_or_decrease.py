@@ -21,6 +21,7 @@ def get_content(has_table=True):
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
     # filename = '100829.html'
     # outpath = './data/temp/'
+    path = '/data/hadoop/yisun/data/tianchi/train_data/增减持/html/'  # 220 地址
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
     for n, index in enumerate(html_dict):
