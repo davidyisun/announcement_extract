@@ -35,18 +35,23 @@ def t1():
     headers = ['index', 'holders', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature']
     data = pd.DataFrame(columns=headers)
     count = 0
+    stat = []
     for index in res2:
         if res2[index][1] == 'complete':
             content = res2[index][0]
             content['index'] = index
-            if content.shape[1] > len(headers):
+            if list(set(content.columns).difference(set(headers))) != []:
+                stat.append(index)
                 continue
             data = pd.merge(data, content, how='outer')
             count += 1
             print('--- together {0} --- count {1}'.format(index, count))
-    data.reindex(columns=headers)
+    data = data.reindex(columns=headers)
     data.to_csv('./zengjianchi_table.csv', index=False)
+    print(stat)
     return
+
+
 if __name__ == '__main__':
     t1()
     pass
