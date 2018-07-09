@@ -22,8 +22,8 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '170914.html'
-    outpath = './data/temp/'
+    # filename = '356373.html'
+    # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
     for n, index in enumerate(html_dict):
@@ -52,7 +52,7 @@ def extract_table(table_dict):
     reg_date = [re.compile('日期|时间|期间'), re.compile('星星点灯')]
     reg_holders = [re.compile('股东名称|股东姓名'), re.compile('星星点灯')]
     reg_price = [re.compile('价格|均价|元'), re.compile('总.*额')]
-    reg_amount = [re.compile('股数|数量'), re.compile('前|后|持有*股*数量*')]
+    reg_amount = [re.compile('股数|数量'), re.compile('前|后|持有股数|持股数量|持有数量')]
     reg_amount_later = [re.compile('后持有+.*股数量*|[增减]持[前后]+.*股数量*|当前持+.*股数量*'), re.compile('星星点灯')]
     reg_amount_ratio_later = [re.compile('后持有+.*比例*|[增减]持[前后]+.*比例|当前持+.*比例'), re.compile('星星点灯')]
     reg_method = [re.compile('持方式'), re.compile('星星点灯')]  # 增减持方式
