@@ -104,15 +104,15 @@ def main():
     result = {}
     result2 = {}
     for n, index in enumerate(res):
-        print('processing {0} -- total: {1} this: {2}'.format(index, len(res), n))
         contents = res[index][0]
-        result[index.replace('.html', '')] = []
+        name = index.replace('.html', '')
+        result[name] = []
         for content in contents:
             if content['type'] in ['single_table']:
                 # 提取信息
                 data = extract_table(content['content'])
-                result[index.replace('.html', '')].append(data)
-        result2[index.replace('.html', '')] = tables_merge(result[index])
+                result[name].append(data)
+        result2[name] = tables_merge(result[name])
     return result2
 
 

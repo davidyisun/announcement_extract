@@ -14,11 +14,11 @@ def t():
             'no_keys': [],
             'normal': []}
     for index in res:
-        data[res(index)].append(index)
-    print('total:{0}'.format(len(data)))
+        data[res[index]].append(index)
+    print('total:{0}'.format(len(res)))
     print('multi_keys:{0}'.format(len(data['multi_keys'])))
     print('no_keys:{0}'.format(len(data['no_keys'])))
-    print('normal:{0}'.format(len(data['nomarl'])))
+    print('normal:{0}'.format(len(data['normal'])))
     return data
 
 if __name__ == '__main__':
