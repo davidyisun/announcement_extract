@@ -85,9 +85,13 @@ def t1():
             for i, j in content.iterrows():
                 a.append(full_and_short_merge(j, full_short))
             df = pd.DataFrame(a)
-            data = pd.merge(data, df, how='outer')
-            count += 1
-            print('--- together {0} --- count {1}'.format(index, count))
+            try:
+                data = pd.merge(data, df, how='outer')
+                count += 1
+                print('--- together {0} --- count {1}'.format(index, count))
+            except Exception as e:
+                print('--- wrong with {0} --- {1}'.format(index, e))
+                continue
     data = data.reindex(columns=new_headers)
     data = data.drop(labels=['method', 'share_nature'], axis=1)
     data.to_csv('./zengjianchi_table.csv', index=False)

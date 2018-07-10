@@ -23,7 +23,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '18887465.html'
+    # filename = '10789690.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
