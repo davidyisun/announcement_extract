@@ -55,7 +55,7 @@ def float_normalize(text, type, dim=2, unit=''):
         coeff *= 100
     if '%' in unit:
         coeff *= 0.01
-    d = re.split(re.compile('[-~]'), text)[-1]
+    d = re.split(re.compile('[-~至]'), text)[-1]
     d1 = re.findall(re.compile('[\.|\d]'), d)
     d2 = ''.join(d1)
     if d2 == '':
