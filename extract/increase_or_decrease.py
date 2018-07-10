@@ -23,7 +23,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '16394223.html'
+    # filename = '14666351.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -45,7 +45,7 @@ def extract_table(table_dict):
     # 寻找日期及股东名称
     # --- 正则格式为 [匹配， 不匹配]
     reg_date = [re.compile('日期|时间|期间'), re.compile('星星点灯')]
-    reg_holders = [re.compile('股东名称|股东姓名|姓名'), re.compile('星星点灯')]
+    reg_holders = [re.compile('股东名称|股东姓名|姓名|股东及其一致行动人名称'), re.compile('星星点灯')]
     reg_price = [re.compile('价格|均价|元'), re.compile('总.*额')]
     reg_amount = [re.compile('股数|数量'), re.compile('前|后|持有股数|持股数量|持有数量|比例*')]
     reg_amount_later = [re.compile('后持有+.*股*数量*|[增减]持[后]+.*股*数量*|当前持+.*股*数量*'), re.compile('比例*')]
