@@ -55,12 +55,15 @@ def float_normalize(text, type, dim=2, unit=''):
         coeff *= 100
     if '%' in unit:
         coeff *= 0.01
-    d = re.split(re.compile('[-~至]'), text)[-1]
+    d = re.split(re.compile('[-－~至]'), text)[-1]
     d1 = re.findall(re.compile('[\.|\d]'), d)
     d2 = ''.join(d1)
     if d2 == '':
         return d2
-    res = round(float(d2) * coeff, dim)
+    try:
+        res = round(float(d2) * coeff, dim)
+    except:
+        pass
     if type == 'float' and str(res).endswith('.0'):
         res = int(res)
     if type == 'int':

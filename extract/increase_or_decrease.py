@@ -22,9 +22,9 @@ def get_content(has_table=True):
     filename = None
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '14666351.html'
-    # outpath = './data/temp/'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    filename = '20526193.html'
+    outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
     for n, index in enumerate(html_dict):
