@@ -67,7 +67,7 @@ def full_and_short_merge(df,full_short_list):
 
 def t1():
     # 统计单表中只含有标准格式的数据
-    res1, res2 = id.main()
+    res1, res2, error = id.main()
     headers = ['index', 'holders', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature']
     new_headers = ['index', 'holders_fullname', 'holders_shortname', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature']
     data = pd.DataFrame(columns=new_headers)
@@ -91,6 +91,9 @@ def t1():
     data = data.reindex(columns=new_headers)
     data = data.drop(labels=['method', 'share_nature'], axis=1)
     data.to_csv('./zengjianchi_table.csv', index=False)
+    print('error:')
+    print(error)
+    print('failed:')
     print(stat)
     return
 

@@ -220,6 +220,7 @@ def main():
     res, total, has_table = get_content(True)
     result1 = {}
     result2 = {}
+    error = []
     for n, index in enumerate(res):
         contents = res[index][0]
         name = index.replace('.html', '')
@@ -239,8 +240,9 @@ def main():
         except Exception as e:
             print('the exception is {0}'.format(e))
             print('wrong with {0}'.format(index))
+            error.append(index)
             continue
-    return result1, result2
+    return result1, result2, error
 
 
 if __name__ == '__main__':
