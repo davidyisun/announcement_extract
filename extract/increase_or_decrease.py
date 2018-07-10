@@ -23,7 +23,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '18862885.html'
+    # filename = '18887465.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -225,16 +225,21 @@ def main():
         name = index.replace('.html', '')
         result1[name] = []
         print('extract {0} -- total: {1} this: {2}'.format(index, len(res), n))
-        for content in contents:
-            if content['type'] in ['single_table']:
-                # 提取信息
-                data = extract_table(content['content'])
-                # 空表继续
-                if data[0].shape[0] == 0:
-                    continue
-                result1[name].append(data)
-        print('-----merge ********')
-        result2[name] = tables_merge(result1[name])
+        try:
+            for content in contents:
+                if content['type'] in ['single_table']:
+                    # 提取信息
+                    data = extract_table(content['content'])
+                    # 空表继续
+                    if data[0].shape[0] == 0:
+                        continue
+                    result1[name].append(data)
+            print('-----merge ********')
+            result2[name] = tables_merge(result1[name])
+        except Exception as e:
+            print('the exception is {0}'.format(e))
+            print('wrong with {0}'.format(index))
+            continue
     return result1, result2
 
 
