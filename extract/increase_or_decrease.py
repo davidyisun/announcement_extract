@@ -12,6 +12,7 @@ import pandas as pd
 from fomat_conversion import tianchi_html_complete as convert
 import copy
 import numpy as np
+from utils import text_normalize
 
 
 # 获取数据
@@ -22,7 +23,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '100829.html'
+    # filename = '19205591.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -40,12 +41,6 @@ def get_content(has_table=True):
     return contents, total, has_table
 
 
-def extract():
-    # 比对表头
-    contents = get_content()
-    return
-
-
 def extract_table(table_dict):
     # 寻找日期及股东名称
     # --- 正则格式为 [匹配， 不匹配]
@@ -57,6 +52,7 @@ def extract_table(table_dict):
     reg_amount_ratio_later = [re.compile('后持有+.*比例*|[增减]持[前后]+.*比例|当前持+.*比例'), re.compile('星星点灯')]
     reg_method = [re.compile('持方式'), re.compile('星星点灯')]  # 增减持方式
     reg_share_nature = [re.compile('性质'), re.compile('星星点灯')] # 股份性质
+    # 正则字典
     reg_dict = {'date': reg_date,                      # 变动截止日期
                 'method': reg_method,                  # 增减持方式
                 'holders': reg_holders,                # 股东名称
@@ -65,14 +61,32 @@ def extract_table(table_dict):
                 'amount_later': reg_amount_later,      # 变动后持股数
                 'amount_ratio_later': reg_amount_ratio_later,   # 变动后持股比例
                 'share_nature': reg_share_nature}    # 股份性质
-    data = pd.DataFrame(columns=['holders', 'date','method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature'])
+    data = pd.DataFrame(columns=['holders', 'date', 'method', 'price', 'amount', 'amount_later', 'amount_ratio_later', 'share_nature'])
     headers = table_dict['headers']
     df = table_dict['df']
+    unit = {}  # 表头单位识别
     for header in headers:
         for reg in reg_dict:
             if re.search(reg_dict[reg][0], header) != None and re.search(reg_dict[reg][1], header) == None:
+                unit[reg] = text_normalize.unit_recognize(header)
                 data[reg] = df[header]
-    data = data.dropna(axis=1) # 删除空列
+    data = data.dropna(axis=1)  # 删除空列
+    # 转换数值型字段
+    filed_to_float = ['price', 'amount_ratio_later']
+    filed_to_int = ['amount', 'amount_later']
+    for head in filed_to_float:
+        if head in data.columns:
+            f = lambda x: text_normalize.float_normalize(x, type='float', unit=unit[head], dim=4)
+            data[head] = data[head].map(f)
+    for head in filed_to_int:
+        if head in data.columns:
+            f = lambda x: text_normalize.float_normalize(x, type='int', unit=unit[head], dim=4)
+            data[head] = data[head].map(f)
+    # 股东名空值 --> 向上填充
+    if 'holders' in data.columns:
+        f = lambda x: np.nan if x == '---' else x
+        data['holders'] = data['holders'].map(f)
+        data['holders'] = data['holders'].fillna(method='pad')
     # 标记含主键的表格
     has_key = False
     if 'date' in data and data.shape[0] != 0:
@@ -86,7 +100,7 @@ def _groupby_fun1(df):
     :param df:
     :return:
     """
-    d = df[df['share_nature'].str.contains('合计')]
+    d = df[df['share_nature'].str.contains('合计|持有股份总数')]
     if d.shape[0] != 0:
         data = d.copy()
     else:
@@ -124,7 +138,17 @@ def date_transform(date_str):
     date = re.findall(r'\d{4}[年\.-]\d{1,2}[月\.-]\d*日*|\d{4}/\d{1,2}/\d*日*', date_str)
     if len(date) != 0:
         res = date [-1]
-    res = re.sub(re.compile(r'日|月|年|\.|/'), '-', res)
+    res = re.sub(re.compile(r'月|年|\.|/'), '-', res)
+    res = re.sub(r'日', '', res)
+    s = res.split('-')
+    if len(s) != 0:
+        _res = []
+        for i in s:
+            k = i
+            if len(i)<2:
+                k = '0'+i
+            _res.append(k)
+        res = '-'.join(_res)
     return res
 
 
@@ -188,17 +212,6 @@ def tables_merge(tables):
     else:
         date_table = _groupby_fun2(date_table)
     date_table = date_table.reset_index(drop=True)
-    #
-    # # 整理变动后股份
-    # if 'amount_later' in date_table.columns:
-    #     amount_later = date_table['amount_later'].value_counts()
-    #     if date_table.shape[0] > 1 and amount_later.shape[0] == 1:
-    #         date_table['amount_later'][date_table['date'] != date_table['date'].max()] = np.nan
-    # # 整理变动后占比的信息
-    # if 'amount_ratio_later' in date_table.columns:
-    #     amount_ratio_later = date_table['amount_ratio_later'].value_counts()
-    #     if date_table.shape[0] > 1 and amount_ratio_later.shape[0] == 1:
-    #         date_table['amount_ratio_later'][date_table['date'] != date_table['date'].max()] = np.nan
     return [date_table, 'complete']
 
 

@@ -1,3 +1,4 @@
 *.pdf
 *.html
 *.txt
+!./data/full_short_name_pair/full_short.txt
