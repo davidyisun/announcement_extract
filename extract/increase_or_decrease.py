@@ -23,7 +23,7 @@ def get_content(has_table=True):
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '19205591.html'
+    # filename = '399725.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -83,7 +83,7 @@ def extract_table(table_dict):
             f = lambda x: text_normalize.float_normalize(x, type='int', unit=unit[head], dim=4)
             data[head] = data[head].map(f)
     # 股东名空值 --> 向上填充
-    if 'holders' in data.columns:
+    if 'holders' in data.columns and data['holders'][0] != '---':
         f = lambda x: np.nan if x == '---' else x
         data['holders'] = data['holders'].map(f)
         data['holders'] = data['holders'].fillna(method='pad')

@@ -57,6 +57,9 @@ def full_and_short_merge(df,full_short_list):
     if _full_name != [] and _short_name == []:
         full_name = _full_name[0]
         short_name = df['holders']
+    if df['holders'] == np.nan and len(full_short_list) == 1:
+        full_name = full_short_list[0]
+        short_name = full_short_list[1]
     res['holders_fullname'] = full_name
     res['holders_shortname'] = short_name
     return res
