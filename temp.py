@@ -45,18 +45,19 @@ def read_full_short():
 
 def full_and_short_merge(df,full_short_list):
     res = df.drop('holders')
+    full_name = df['holders']
+    short_name = np.nan
     name_list = [i for i in full_short_list if i[0] == df['index']]
-    _short_name = [i[2] for i in name_list if i[0] == df['index'] and i[1] == df['holders']]
-    _full_name = [i[1] for i in name_list if i[0] == df['index'] and i[2] == df['holders']]
-    if _full_name == [] and _short_name == []:
-        full_name = df['holders']
-        short_name = np.nan
+    _short_name = [i for i in name_list if i[0] == df['index'] and i[2] == df['holders']]
+    _full_name = [i for i in name_list if i[0] == df['index'] and i[1] == df['holders']]
     if _full_name == [] and _short_name != []:
-        full_name = df['holders']
-        short_name = _short_name[0]
-    if _full_name != [] and _short_name == []:
-        full_name = _full_name[0]
+        # name为简称
+        full_name = _short_name[0][1]
         short_name = df['holders']
+    if _full_name != [] and _short_name == []:
+        # name为全称
+        full_name = df['holders']
+        short_name = _full_name[0][2]
     if df['holders'] == np.nan and len(full_short_list) == 1:
         full_name = full_short_list[0]
         short_name = full_short_list[1]
@@ -85,20 +86,24 @@ def t1():
             for i, j in content.iterrows():
                 a.append(full_and_short_merge(j, full_short))
             df = pd.DataFrame(a)
-            try:
-                data = pd.merge(data, df, how='outer')
-                count += 1
-                print('--- together {0} --- count {1}'.format(index, count))
-            except Exception as e:
-                print('--- wrong with {0} --- {1}'.format(index, e))
-                continue
+            # try:
+            #     data = pd.merge(data, df, how='outer')
+            #     count += 1
+            #     print('--- together {0} --- count {1}'.format(index, count))
+            # except Exception as e:
+            #     print('--- wrong with {0} --- {1}'.format(index, e))
+            #     continue
+            data = pd.concat([data, df], ignore_index=True)
+            count += 1
+            print('--- together {0} --- count {1}'.format(index, count))
+    print('### headers: {0}'.format(' '.join(content.columns)))
     data = data.reindex(columns=new_headers)
     data = data.drop(labels=['method', 'share_nature'], axis=1)
-    data.to_csv('./zengjianchi_table.csv', index=False)
     print('error:')
     print(error)
     print('failed:')
     print(stat)
+    data.to_csv('./zengjianchi_table.csv', index=False)
     return
 
 

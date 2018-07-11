@@ -17,12 +17,13 @@ from utils import text_normalize
 
 # 获取数据
 def get_content(has_table=True):
-    path = '/data/hadoop/yisun/data/tianchi/train_data/增减持/html/'  # 220 地址
+    path = './data/temp/'
+    # path = '/data/hadoop/yisun/data/tianchi/train_data/增减持/html/'  # 220 地址
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
     filename = None
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
     # filename = '10789690.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
@@ -46,7 +47,7 @@ def extract_table(table_dict):
     # --- 正则格式为 [匹配， 不匹配]
     reg_date = [re.compile('日期|时间|期间'), re.compile('星星点灯')]
     reg_holders = [re.compile('股东名称|股东姓名|姓名|股东及其一致行动人名称'), re.compile('星星点灯')]
-    reg_price = [re.compile('价格|均价|元'), re.compile('总.*额')]
+    reg_price = [re.compile('价格|均价|价'), re.compile('总.*额|金额')]
     reg_amount = [re.compile('股数|数量'), re.compile('前|后|持有股数|持股数量|持有数量|比例*')]
     reg_amount_later = [re.compile('后持有.*股*数量*|[增减]持后.*股*数量*|当前持.*股*数量*'), re.compile('比例*')]
     reg_amount_ratio_later = [re.compile('后持有.*比例*|[增减]持后.*比例|当前持.*比例'), re.compile('星星点灯')]
