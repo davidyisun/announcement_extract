@@ -23,8 +23,8 @@ def get_content(has_table=True):
     filename = None
     # outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\outpath\\train\\increase_or_decrease\\'
     # 本地测试
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
-    # filename = '10789690.html'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\数据\\训练数据\\round1_train_20180518\\增减持\\html\\'
+    filename = '10898.html'
     # outpath = './data/temp/'
     html_dict = convert.read_html2(filepath=path, filename=filename)
     contents = {}
@@ -168,11 +168,6 @@ def tables_merge(tables):
             main_table.append(table[0])
         else:
             other_tables.append(table[0])
-    # if len(main_table) > 1:
-    #     return 'multi_keys'
-    # if len(main_table) == 0:
-    #     return 'no_keys'
-    # return 'normal'
     if len(main_table) != 1:  # 只解析单个日期表
         return 'pass'
     date_table = copy.deepcopy(main_table[0])
@@ -218,7 +213,7 @@ def tables_merge(tables):
 
 
 def main():
-    res, total, has_table = get_content(True)
+    res, total, n_has_table = get_content(True)
     result1 = {}
     result2 = {}
     error = []
@@ -247,7 +242,7 @@ def main():
 
 
 if __name__ == '__main__':
-    res1, res2 = main()
+    res1, res2, error = main()
     pass
 
 

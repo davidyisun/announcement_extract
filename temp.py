@@ -96,7 +96,7 @@ def t1():
             data = pd.concat([data, df], ignore_index=True)
             count += 1
             print('--- together {0} --- count {1}'.format(index, count))
-    print('### headers: {0}'.format(' '.join(content.columns)))
+            print('### headers: {0}'.format(' '.join(content.columns)))
     data = data.reindex(columns=new_headers)
     data = data.drop(labels=['method', 'share_nature'], axis=1)
     print('error:')
