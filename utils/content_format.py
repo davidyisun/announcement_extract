@@ -74,14 +74,10 @@ def _check_phrase(text):
     return res
 
 
-def _seg_promption(text):
-    return
-
-
 def _key_value_processing(text):
     key = text.split('：')[0]
     value = text.split('：')[1]
-    return [key, value]
+    return key+'---->'+value
 
 
 def _check_promption(text):
@@ -242,9 +238,10 @@ def check_table(type, content):
     :return:
     """
     table_trs = False
-    if type not in ['table_trs']:
-        res = [{'content': content, 'type': type}]
-    else:
+    res = [{'content': content, 'type': type}]
+    if type in ['key-value']:
+        res = [{'content': _key_value_processing(content), 'type': type}]
+    if type in ['table_trs']:
         table_trs = True
         res = []
         table_list = table_processing(content)
