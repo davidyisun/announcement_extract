@@ -588,7 +588,7 @@ def parser_table(trs_dict, main_title):
 
 def check_title_merge(pre_content, content):
     """
-        检查title合并
+        检查table title合并
     :param pre_type: 
     :param pre_content: 不是当前tr的pre_content 而是pre_pre_content
     :param content: 

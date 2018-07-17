@@ -167,8 +167,8 @@ def tianchi_html_to_text_complete(drop_table=True):
 
 
 if __name__ == '__main__':
+    tianchi_html_to_text_complete(drop_table=False)
     # test_table()
     # html_to_test()
     # table_to_txt_test() # 批量转换含表格html  仕锋软件
     # tianchi_html_to_text_no_table()
-    tianchi_html_to_text_complete(drop_table=False)
