@@ -7,6 +7,8 @@ Created on 2018-06-28
 @group:data
 @contact:davidhu@wezhuiyi.com
 """
+import sys
+sys.path.append('../')
 import copy
 import os
 import codecs
@@ -40,7 +42,7 @@ def read_txt(filepath, filename=None):
         with codecs.open(_file['file_path'], 'r', 'utf8') as f:
             data = f.read()
             print('read {0}'.format(_file['file_name']))
-        data = data.split('\n')
+        data = re.split(re.compile('\n+ {0,1}\n*'), data)
         txt_dict[_file['file_name']] = data
     return txt_dict
 
@@ -57,6 +59,7 @@ def text_classify(text):
         part_sentence: 残句
 
     """
+    text = text.strip()
     if re.findall(re.compile('：|，|。|？'), text) == []:
         return 'phrase'
     if re.findall(re.compile('。$'), text) != []:
@@ -93,7 +96,7 @@ def check_merge(pre_type, cur_type, cur_text, pre_text):
         return True, _cur_text, _cur_type
     # 短语(长度较长)--残句或整句
     if cur_type in ['part_sentence', 'sentence'] and pre_type == 'phrase':
-        if len(pre_text) > 14:
+        if len(pre_text) > 20:
             _cur_text = pre_text + cur_text
             _cur_text = _cur_text.replace(' ', '')
             _cur_type = cur_type
@@ -173,15 +176,21 @@ def get_content(txt_list):
 
 if __name__ == '__main__':
     file_info = get_path_args()
-    txt_dict = read_txt(filepath=file_info['file_path'], filename=file_info['file_name'])
+    file_path = file_info['file_path']
+    file_name = file_info['file_name']
+    save_path = file_info['save_path']
+    # file_path = './'
+    # file_name = '600393_20180704_1205119639.txt'
+    # save_path = './123/'
+    txt_dict = read_txt(filepath=file_path, filename=file_name)
     contents = {}
-    # for index in txt_dict:
-    #     content = get_content(txt_dict[index])
-    #     text = [j['content'] for j in content]
-    #     contents[index] = text
-    #     total = 0
-    #     with codecs.open(file_info['save_path']+index, 'w', 'utf-8') as f:
-    #         print('--- writing {0}'.format(index))
-    #         f.write('\n'.join(text))
-    #         total += 1
-    #         print('counts:'+str(total))
+    for index in txt_dict:
+        content = get_content(txt_dict[index])
+        text = [j['content'] for j in content]
+        contents[index] = text
+        total = 0
+        with codecs.open(save_path+index, 'w', 'utf-8') as f:
+            print('--- writing {0}'.format(index))
+            f.write('\n'.join(text))
+            total += 1
+            print('counts:'+str(total))
