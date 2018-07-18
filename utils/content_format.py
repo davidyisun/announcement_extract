@@ -10,11 +10,10 @@ Created on 2018-07-16
 import sys
 sys.path.append('../')
 import re
-import copy
 from utils.html_table import *
-import copy
 
 
+# 检查text是否为title系列类型
 def _check_title(text):
     """
         判断章节title
@@ -63,6 +62,7 @@ def _check_title(text):
     return res
 
 
+# 检查text是否为phrase类型
 def _check_phrase(text):
     """
         判断短语
@@ -77,12 +77,14 @@ def _check_phrase(text):
     return res
 
 
+# 将xx:bb 转换为 key---->value
 def _key_value_processing(text):
     key = text.split('：')[0]
     value = text.split('：')[1]
     return key+'---->'+value
 
 
+# 检查text是否为提示性类型
 def _check_promption(text):
     if re.findall(re.compile('：$'), text) != []:
         return 'key'
@@ -93,6 +95,7 @@ def _check_promption(text):
     return 'key-value'
 
 
+# 检查text是否为sentence类型
 def _check_sentence(text):
     res = False
     if re.findall(re.compile('。$'), text) != []:
@@ -100,6 +103,7 @@ def _check_sentence(text):
     return res
 
 
+# 检查text是否为残句类型
 def _check_part_sentence(text):
     res = False
     if re.findall(re.compile('，|。'), text) != [] and _check_sentence(text) == False:
@@ -107,6 +111,7 @@ def _check_part_sentence(text):
     return res
 
 
+# text的分类函数
 def text_classify(_text):
     """
         文段分类
@@ -139,6 +144,7 @@ def text_classify(_text):
     return 'other'
 
 
+# 内容的分类函数 包含 text和table
 def content_classify(tag):
     """
         content节点分类
@@ -158,6 +164,7 @@ def content_classify(tag):
     return cur_type, cur_content
 
 
+# 检查前后content是否需要合并
 def _check_merge(pre_type, cur_type, cur_text, pre_text):
     """
         节点合并 非表格 text 为文本 表格 text 为trs
@@ -211,6 +218,7 @@ def _check_merge(pre_type, cur_type, cur_text, pre_text):
     return False, cur_text, cur_type
 
 
+# 检查是否添加表外title到table的title
 def _check_title_merge(pre_content, content):
     """
         检查table title合并
@@ -235,6 +243,7 @@ def _check_title_merge(pre_content, content):
     return res
 
 
+# 检查是否处理表格类型数据 html ---> table_dict
 def check_table(type, content):
     """
         检查数据是否为表格
@@ -265,6 +274,7 @@ def check_table(type, content):
     return table_trs, res
 
 
+# html tags ----> content_list 主函数
 def tags_format(tags_list):
     """
         tags转换
@@ -278,9 +288,6 @@ def tags_format(tags_list):
     pre_type = ''  # 之前的content 类型
     cur_content = ''  # 当前的content
     cur_type = ''  # 之前的content 类型
-    file_tree = {'title_class': (),
-                 'title_series': [],
-                 'title_index': []}
     for j, i in enumerate(tags_list):
         # 获取当前tag的类型
         cur_type, cur_content = content_classify(i)  # cur_content 包含tr 形式的 table --'table_trs'
@@ -319,6 +326,18 @@ def tags_format(tags_list):
         _content = [{'content': cur_content, 'type': pre_type}]
     contents = contents + _content
     return contents, part_table, file_failed
+
+
+# content_list ----> file_tree 文档树结构
+def to_file_tree(content_list):
+    file_tree = {'title_class': (),
+                 'title_series': [],
+                 'title_index': []}
+    title_list = ['mulu', 'shiyi', 'zhongdashixiangtishi', 'title_zhang', 'title_jie',
+                  'title_h1', 'title_h1_', 'title_h2']
+    # for content in content_list:
+
+    return
 
 
 if __name__ == '__main__':

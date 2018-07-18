@@ -7,10 +7,14 @@ Created on 2018-07-16
 @group:data
 @contact:davidhu@wezhuiyi.com
 """
+import sys
+sys.path.append('../')
 import codecs
 from bs4 import BeautifulSoup
 import os
 import re
+from utils import html_table
+import itertools
 import copy
 import numpy as np
 import bs4
@@ -47,6 +51,52 @@ def read_html(filepath, filename=None):
         text_dict[_file['file_name']] = data
     return html_dict
 
+
+def extract_pre_content(tag):
+    """
+        抽取 天池 html 的 目录 风险提示 释义 和正文
+    :param tag:
+    :return:
+        mulu --- list 目录
+        shiyi_dict --- dict 释义
+        major_promption --- str 重大事项提示
+        tag --- tag 余下的tag
+    """
+    # 获取【目录】
+    mulu = []
+    mulu_tag = tag.find_all('div', title=re.compile('目 *录'))
+    if mulu_tag != []:
+        mulu_tag = mulu_tag[0]
+        for i in mulu_tag.find_all(True, text=True):
+            mulu.append(str(i.string).strip())
+        mulu_tag.decompose()
+    # 获取【释义】
+    shiyi_dict = {}
+    shiyi_tag = tag.find_all('div', title=re.compile('释 *义'))
+    if shiyi_tag != []:
+        tables = []
+        shiyi_tag = shiyi_tag[0]
+        for i in shiyi_tag.find_all('table'):
+            if re.findall(re.compile('指'), i.get_text()) != []:
+                tables.append(i)
+        table = []
+        for _table in tables:
+            table = table+_table.find_all('tr')
+        shiyi_list = html_table.table2mat(table).tolist()
+        for i in shiyi_list:
+            key = i[0].split('、')
+            value = i[2]
+            _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
+            shiyi_dict.update(_kv)
+        shiyi_tag.decompose()
+    # 获取【重大事项提示】
+    major_promption = ''
+    mp_tag = tag.find_all('div', title=re.compile('重大事项提示'))
+    if mp_tag != []:
+        mp_tag = mp_tag[0]
+        major_promption = mp_tag.get_text()
+        mp_tag.decompose()
+    return mulu, shiyi_dict, major_promption, tag
 
 # 获取text信息
 def get_content(tag):

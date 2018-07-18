@@ -244,6 +244,22 @@ def find_title(tr_dict):
         return -1
 
 
+def table2mat(trs):
+    """
+        table直接转换为df no head
+    :param trs: beautifulsoup tag
+    :return:
+    """
+    trs_dict = [tr_processing(i) for i in trs if i.get_text() not in ['', ' ']]
+    try:
+        table_col = trs_dict[0]['tr_cols']
+    except:
+        pass
+    table_row = len(trs_dict)
+    _table, trs_letf = trs_formalized(trs_dict, array_shape=(table_row, table_col))
+    return _table
+
+
 def table_processing(trs_list):
     """
         对trs以list的形式parser
@@ -277,7 +293,6 @@ def table_processing(trs_list):
     tables.reverse()  # 还原顺序
     # 解析表格
     title_append = True # 总标题append开关
-    n_subtable = 0
     # 寻找主标题
     while title_append:
         if len(tables) == 0: # 表头走完 假表
@@ -298,7 +313,7 @@ def table_processing(trs_list):
     if len(tables) > 1:
         table_type = 'multi_row_tables'  # 多行子表
         _tables = []
-        for i in tables: # 合成一张表
+        for i in tables:  # 合成一张表
             _tables = _tables + i
         _table_col = _tables[0]['tr_cols']
         _table_row = len(_tables)

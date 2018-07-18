@@ -21,8 +21,13 @@ def t1(drop_table=False):
         if drop_table:
             for i in h.find_all('table'):
                 i.decompose()
-        content = tc.get_content(h)
-        content, part_table, table_failed = cf.tags_format(content)
+        mulu, shiyi_dict, major_promption, tag = tc.extract_pre_content(h)
+        _content = tc.get_content(tag)
+        _content, part_table, table_failed = cf.tags_format(_content)
+        content = {'mulu': mulu,
+                   'shiyi': shiyi_dict,
+                   'major_promption': major_promption,
+                   'content': _content}
         contents[index] = content
     return contents
 

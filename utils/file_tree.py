@@ -9,3 +9,8 @@ Created on 2018-07-17
 """
 import sys
 sys.path.append('../')
+
+
+def get_file_tree(content_list):
+
+    pass
