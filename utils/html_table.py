@@ -9,6 +9,7 @@ Created on 2018-07-17
 """
 import pandas as pd
 import numpy as np
+import copy
 
 
 def tr_processing(tr):

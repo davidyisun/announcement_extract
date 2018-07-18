@@ -7,9 +7,12 @@ Created on 2018-07-16
 @group:data
 @contact:davidhu@wezhuiyi.com
 """
+import sys
+sys.path.append('../')
 import re
 import copy
-from html_table import table_preprocess
+from utils.html_table import *
+import copy
 
 
 def _check_title(text):
@@ -28,7 +31,7 @@ def _check_title(text):
     reg4_no = '星星点灯'
     reg5 = '^（[一二三四五六七八九十]{1,2}）'
     reg5_no = '星星点灯'
-    reg6 = '^\d{1,2}[、.]'
+    reg6 = '^\d{1,2}[、．]'
     reg6_no = '星星点灯'
     if len(re.findall(re.compile(reg), text)) == 1:
         if len(re.findall(re.compile(reg), text)[0]) == len(text):
@@ -99,12 +102,12 @@ def _check_sentence(text):
 
 def _check_part_sentence(text):
     res = False
-    if re.findall(re.compile('，|。'), text) != [] and _check_sentence(text) == []:
+    if re.findall(re.compile('，|。'), text) != [] and _check_sentence(text) == False:
         res = True
     return res
 
 
-def text_classify(text):
+def text_classify(_text):
     """
         文段分类
     :param text:
@@ -115,8 +118,8 @@ def text_classify(text):
         promption_head:  提示头
         part_sentence: 残句
     """
-    text = text.strip()
-    text = re.sub(re.compile(' +$'), text)
+    text = _text.strip()
+    text = re.sub(re.compile(' +$'), '', text)
     title = _check_title(text)  # 找title
     if title != '':
         return title
@@ -135,18 +138,20 @@ def text_classify(text):
         return 'part_sentence'
     return 'other'
 
+
 def content_classify(tag):
     """
         content节点分类
-    :param tag:
+    :param tag: html tag标签
     :return:
     """
     if type(tag) == str:
         # ---文本---
         _text = tag
-        _text = re.sub(' ', '', _text)
+        cur_type = text_classify(_text)
+        if cur_type != 'other':
+            _text = re.sub(' ', '', _text)
         cur_content = _text.strip()
-        cur_type = text_classify(cur_content)
     else:
         cur_content = tag
         cur_type = 'table_trs'
@@ -273,6 +278,9 @@ def tags_format(tags_list):
     pre_type = ''  # 之前的content 类型
     cur_content = ''  # 当前的content
     cur_type = ''  # 之前的content 类型
+    file_tree = {'title_class': (),
+                 'title_series': [],
+                 'title_index': []}
     for j, i in enumerate(tags_list):
         # 获取当前tag的类型
         cur_type, cur_content = content_classify(i)  # cur_content 包含tr 形式的 table --'table_trs'
@@ -290,9 +298,9 @@ def tags_format(tags_list):
                 pre_type = _pre_type
                 pre_content = _pre_content
                 continue
-            if is_trans_table_trs: # 是否需要转换表格
+            if is_trans_table_trs:  # 是否需要转换表格
                 if contents != []:
-                    _content = _check_title_merge(contents[-1], content) # 合并title
+                    _content = _check_title_merge(contents[-1], content)  # 合并title
                 else:
                     _content = content
             else:
@@ -311,3 +319,8 @@ def tags_format(tags_list):
         _content = [{'content': cur_content, 'type': pre_type}]
     contents = contents + _content
     return contents, part_table, file_failed
+
+
+if __name__ == '__main__':
+    s = '2．发起人出资情况'
+    n = _check_title(s)
