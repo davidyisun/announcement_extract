@@ -15,11 +15,8 @@ import os
 import re
 from utils import html_table
 import itertools
-import copy
-import numpy as np
 import bs4
-from optparse import OptionParser
-import pandas as pd
+
 
 
 # 读入htmls 以字典形式保存

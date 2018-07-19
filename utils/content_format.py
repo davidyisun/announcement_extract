@@ -21,9 +21,9 @@ def _check_title(text):
     :return:
     """
     res = ''
-    reg = '^目 *录'
-    reg0 = '^释 *义'
-    reg1 = '^重大事项提示'
+    # reg = '^目 *录'
+    # reg0 = '^释 *义'
+    # reg1 = '^重大事项提示'
     reg2 = '^第[一二三四五六七八九十\d]{1,2}章'
     reg3 = '^第[一二三四五六七八九十\d]{1,2}节'
     reg4 = '^[一二三四五六七八九十]{1,2}、'
@@ -32,18 +32,18 @@ def _check_title(text):
     reg5_no = '星星点灯'
     reg6 = '^\d{1,2}[、．]'
     reg6_no = '星星点灯'
-    if len(re.findall(re.compile(reg), text)) == 1:
-        if len(re.findall(re.compile(reg), text)[0]) == len(text):
-            res = 'mulu'
-            return res
-    if len(re.findall(re.compile(reg0), text)) == 1:
-        if len(re.findall(re.compile(reg0), text)[0]) == len(text):
-            res = 'shiyi'
-            return res
-    if len(re.findall(re.compile(reg1), text)) == 1:
-        if len(re.findall(re.compile(reg1), text)[0]) == len(text):
-            res = 'zhongdashixiangtishi'
-            return res
+    # if len(re.findall(re.compile(reg), text)) == 1:
+    #     if len(re.findall(re.compile(reg), text)[0]) == len(text):
+    #         res = 'mulu'
+    #         return res
+    # if len(re.findall(re.compile(reg0), text)) == 1:
+    #     if len(re.findall(re.compile(reg0), text)[0]) == len(text):
+    #         res = 'shiyi'
+    #         return res
+    # if len(re.findall(re.compile(reg1), text)) == 1:
+    #     if len(re.findall(re.compile(reg1), text)[0]) == len(text):
+    #         res = 'zhongdashixiangtishi'
+    #         return res
     if len(re.findall(re.compile(reg2), text)) == 1 and _check_phrase(text):
         res = 'title_zhang'
         return res
@@ -333,11 +333,143 @@ def to_file_tree(content_list):
     file_tree = {'title_class': (),
                  'title_series': [],
                  'title_index': []}
-    title_list = ['mulu', 'shiyi', 'zhongdashixiangtishi', 'title_zhang', 'title_jie',
-                  'title_h1', 'title_h1_', 'title_h2']
+    title_list = ['title_zhang', 'title_jie', 'title_h1', 'title_h1_', 'title_h2']
     # for content in content_list:
-
+    types = [i['type'] for i in content_list]
     return
+
+
+class file_tree(object):
+    def __init__(self, mulu, shiyi, zhongdashixiangtishi, content_list):
+        self.mulu = mulu
+        self.shiyi = shiyi
+        self.zhongdashixiangtishi = zhongdashixiangtishi
+        self.content = content_list
+        self.types = [i['type'] for i in content_list]
+        self.contents = [i['content'] for i in content_list]
+    def get_file_tree(self):
+        """
+            ---> 文档树结构
+        :return:
+        """
+        # 确定title层级
+        _titles = ['title_zhang', 'title_jie', 'title_h1', 'title_h1_', 'title_h2']
+        if 'title_h1' in self.types and 'title_h1_' in self.types:
+            if self.types.index('title_h1') > self.types.index('title_h1_'):
+                _titles = ['title_zhang', 'title_jie', 'title_h1_', 'title_h1', 'title_h2']
+        structure = []
+        for i, _title in enumerate(_titles):
+            if _title in self.types:
+                structure.append(_title)
+        self.depth = len(structure)  # 文档最大深度
+        _content = self.content
+        # 切割文段
+        res = self._recursion_tree(content=_content, title=structure+['aaaa'])
+        return res
+
+
+    def _recursion_tree(self, content, title):
+        _content = copy.deepcopy(content)
+        types = [i['type'] for i in _content]
+        step = ''
+        for i in title:
+            if i in types:
+                step = i
+                break
+        if step == '':
+            return _content
+        else:
+            if _content[0]['type'] != step:
+                _content = [{'content': '', 'type': 'pre-'+step}] + _content
+            sub_content_list = []  # 存储分割后的数据
+            _sub_content = [_content[0]]  # 缓存分割数据
+            # 分割tag
+            for i in _content[1:]:
+                if i['type'] == step:
+                    sub_content_list.append(_sub_content)
+                    _sub_content = []
+                _sub_content.append(i)
+            if _sub_content != []:
+                sub_content_list.append(_sub_content)
+            res = []
+            for i in sub_content_list:
+                if i == []:
+                    continue
+                if len(i) == 1:
+                    sub_res = i
+                else:
+                    sub_res = self._recursion_tree(content=i[1:], title=title)
+                res.append({'title': i[0]['content'],
+                            'type': i[0]['type'],
+                            'content': sub_res})
+        return res
+
+
+    def get_tree_list(self):
+        """
+            ---> title线性list结构
+        :return:
+        """
+        # 确定title层级
+        _titles = ['title_zhang', 'title_jie', 'title_h1', 'title_h1_', 'title_h2']
+        if 'title_h1' in self.types and 'title_h1_' in self.types:
+            if self.types.index('title_h1') > self.types.index('title_h1_'):
+                _titles = ['title_zhang', 'title_jie', 'title_h1_', 'title_h1', 'title_h2']
+        structure = []
+        for i, _title in enumerate(_titles):
+            if _title in self.types:
+                structure.append(_title)
+        self.depth = len(structure)  # 文档最大深度
+        _content = self.content
+        # 切割文段
+        res = self._recursion_tree_list(content=_content, title=structure+['aaaa'])
+        return res
+
+
+    def _recursion_tree_list(self, content, title):
+        _content = copy.deepcopy(content)
+        types = [i['type'] for i in _content]
+        step = ''
+        for i in title:
+            if i in types:
+                step = i
+                break
+        if step == '':
+            return [{'content': _content, 'type': 'content', 'title': ''}]
+        else:
+            if _content[0]['type'] != step:
+                _content = [{'content': '', 'type': 'pre-'+step}] + _content
+            sub_content_list = []  # 存储分割后的数据
+            _sub_content = [_content[0]]  # 缓存分割数据
+            # 分割tag
+            for i in _content[1:]:
+                if i['type'] == step:
+                    sub_content_list.append(_sub_content)
+                    _sub_content = []
+                _sub_content.append(i)
+            if _sub_content != []:
+                sub_content_list.append(_sub_content)
+            res = []
+            for i in sub_content_list:
+                _title = i[0]['content']
+                _type = i[0]['type']
+                _content = []
+                if i == []:
+                    continue
+                if len(i) == 1:
+                    _content = i
+                    res = res + [{'content': _content, 'type': _type, 'title': _title}]
+                else:
+                    sub_res = self._recursion_tree_list(content=i[1:], title=title)
+                    for j in sub_res:
+                        __title = _title + '--' + j['title']
+                        __type = _type + '--' + j['type']
+                        __content = j['content']
+                        try:
+                            res = res + [{'content': __content, 'type': __type, 'title': __title}]
+                        except:
+                            pass
+        return res
 
 
 if __name__ == '__main__':

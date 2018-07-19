@@ -9,8 +9,12 @@ Created on 2018-07-18
 """
 import sys
 sys.path.append('../')
-from utils import other_tools, tian_chi
+from utils import other_tools, tian_chi, content_format
 def t():
+    """
+        抽取预信息
+    :return:
+    """
     data = other_tools.get_tags()
     d = tian_chi.extract_pre_content(data)
     return d

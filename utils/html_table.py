@@ -135,8 +135,6 @@ def cell_text_type(s):
 def cell_location(_np_array, n_row, n_col):
     i = 0
     j = 0
-    # print(n_row)
-    # print(n_col)
     while _np_array[i, j] != None:
         j += 1
         if j >= n_col:  # 先找行 再找列
@@ -215,7 +213,7 @@ def parser_table(trs_dict, main_title):
         df = pd.DataFrame()
         for i, head in enumerate(_headers_list):
             if head in df.columns:
-                print(head)
+                # print(head)
                 new_col = []
                 for i in zip(df[head], table_array[:, i].astype(np.str)):
                     if i[0] == i[1]:
@@ -251,10 +249,7 @@ def table2mat(trs):
     :return:
     """
     trs_dict = [tr_processing(i) for i in trs if i.get_text() not in ['', ' ']]
-    try:
-        table_col = trs_dict[0]['tr_cols']
-    except:
-        pass
+    table_col = trs_dict[0]['tr_cols']
     table_row = len(trs_dict)
     _table, trs_letf = trs_formalized(trs_dict, array_shape=(table_row, table_col))
     return _table
