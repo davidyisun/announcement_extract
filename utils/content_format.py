@@ -465,10 +465,7 @@ class file_tree(object):
                         __title = _title + '--' + j['title']
                         __type = _type + '--' + j['type']
                         __content = j['content']
-                        try:
-                            res = res + [{'content': __content, 'type': __type, 'title': __title}]
-                        except:
-                            pass
+                        res = res + [{'content': __content, 'type': __type, 'title': __title}]
         return res
 
 
