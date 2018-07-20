@@ -71,14 +71,14 @@ def main(postfix='.html', batches=100):
     label_file = '/data/hadoop/yisun/data/tianchhi2/train_label/chongzu.train'
     outpath = '/data/hadoop/yisun/data/tianchhi2/result/train/chongzu/'
     # # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['148856.html']
-    # outpath = '../data/train_data/output_label/'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['488675.html']
+    outpath = '../data/train_data/output_label/'
     # # --- 本地数据 ---
     # path = '../data/temp2/'
     # filename = None
-    # # filename = ['23599.html']
-    # outpath = '../data/temp2/result/'
+    # filename = ['488675.html']
+    outpath = '../data/temp2/result/'
     # label_file = '../data/train_data/train_labels/chongzu.train'
 
     if filename == None:
@@ -89,6 +89,14 @@ def main(postfix='.html', batches=100):
     n_files = len(file_list)  # 总文件数
     n_batch = math.ceil(n_files/batches)
     batch_head = 0
+    # 清除已有result文件
+    f = [outpath+i for i in os.listdir(outpath)]
+    for i in f:
+        try:
+            os.remove(i)
+        except:
+            pass
+    # 批量写入
     for batch in range(n_batch):
         _file_list = file_list[batch_head:batch_head+batches]
         if len(_file_list) == 0:
@@ -96,7 +104,6 @@ def main(postfix='.html', batches=100):
         from_shiyi(path=path, outpath=outpath, filename=_file_list)
         batch_head = batch_head+batches
     return
-
 
 
 if __name__ == '__main__':

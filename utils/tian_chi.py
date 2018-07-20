@@ -99,7 +99,9 @@ def extract_pre_content(tag):
         table = []
         for _table in tables:
             table = table+_table.find_all('tr')
-        shiyi_list = html_table.table2mat(table).tolist()
+        shiyi_list = []
+        if len(table) >0:
+            shiyi_list = html_table.table2mat(table).tolist()
         for i in shiyi_list:
             key = i[0].split('、')
             value = i[2]
