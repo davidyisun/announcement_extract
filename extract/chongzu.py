@@ -12,6 +12,8 @@ sys.path.append('../')
 from utils import tian_chi, content_format
 from multiprocessing import Pool
 import re
+import os
+import math
 
 
 def html2file_tree(html, drop_table=False):
@@ -81,7 +83,6 @@ def get_pre_content(path, filename, drop_table=False, keys=['mulu', 'shiyi', 'ma
     return contents
 
 
-
 def get_file_tree(path, filename, drop_table=False, method='list'):
     # --- pre_main ---
     html_dict = tian_chi.read_html(filepath=path, filename=filename)
@@ -138,12 +139,8 @@ class ExtractDevice(content_format.FileTree):
         self.jiaoyiduifang = jiaoyiduifang
 
 
-
 def extract_info(tree_list):
     pass
-
-
-
 
 
 if __name__ == '__main__':

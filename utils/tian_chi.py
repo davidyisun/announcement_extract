@@ -16,7 +16,24 @@ import re
 from utils import html_table
 import itertools
 import bs4
+import os
 
+
+# 读入html 单个
+def read_single_html(filepath, filename=None):
+    """
+        单个天池html格式读入
+    :param filepath: html文件地址
+    :param filename: html文件名
+    :return: dict key为html文件名 value为beautifulsoup对象
+    """
+    with codecs.open(filepath+os.sep+filename, 'r', 'utf8') as f:
+        data = f.read()
+    # 去掉换行符
+    data = re.sub(re.compile('>\n* *<'), '><', data)
+    data = re.sub(re.compile('\n'), '', data)
+    html = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
+    return html
 
 
 # 读入htmls 以字典形式保存
@@ -30,8 +47,11 @@ def read_html(filepath, filename=None):
     if filename == None:
         files_name = os.listdir(filepath)
     else:
-        files_name = [filename]
-    file_list = [{'file_name': i, 'file_path': filepath+i} for i in files_name if i.endswith('.html')]
+        files_name = filename
+    try:
+        file_list = [{'file_name': i, 'file_path': filepath+i} for i in files_name if i.endswith('.html')]
+    except:
+        pass
     html_dict = {}
     text_dict = {}
     for i, _file in enumerate(file_list):

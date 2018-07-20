@@ -10,27 +10,15 @@ Created on 2018-07-20
 import sys
 sys.path.append('../')
 from extract import chongzu
-from utils import result_compare
+from utils import result_compare, tian_chi
 import itertools
 import pandas as pd
+import os
+import math
+import codecs
 
 
-def from_shiyi():
-    # --- 服务器数据 220 ---
-    path = '/data/hadoop/yisun/data/tianchhi2/train/chongzu/html/'
-    filename = None
-    label_file = '/data/hadoop/yisun/data/tianchhi2/train_label/chongzu.train'
-    outpath = '/data/hadoop/yisun/data/tianchhi2/result/train/chongzu/'
-    # # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = '148856.html'
-    # outpath = '../data/train_data/output_label/'
-    # # --- 本地数据 ---
-    # path = '../data/temp2/'
-    # filename = None
-    # # filename = '23599.html'
-    # outpath = '../data/temp2/result/'
-    # label_file = '../data/train_data/train_labels/chongzu.train'
+def from_shiyi(path, filename, outpath, result_append=True):
     data = chongzu.get_pre_content(path=path, filename=filename, keys=['shiyi'])
     result_mark = []
     result_mark_com = []
@@ -57,11 +45,60 @@ def from_shiyi():
     df_mark = pd.DataFrame(result_mark, columns=['id', 'mark'])
     df_mark_com = pd.DataFrame(result_mark_com, columns=['id', 'mark_com'])
     df_jiaoyiduifang = pd.DataFrame(result_jiaoyiduifang, columns=['id', 'jiaoyiduifang'])
-    df_mark.to_csv(outpath+'mark.csv', index=False, encoding='utf8')
-    df_mark_com.to_csv(outpath + 'mark_com.csv', index=False, encoding='utf8')
-    df_jiaoyiduifang.to_csv(outpath + 'jiaoyiduifang.csv', index=False, encoding='utf8')
+
+    result = {'mark': df_mark,
+              'mark_com': df_mark_com,
+              'jiaoyiduifang': df_jiaoyiduifang}
+    out_names = ['mark', 'mark_com', 'jiaoyiduifang']
+
+    for i in out_names:
+        out_name = outpath+i+'.csv'
+        if result_append:
+            with codecs.open(out_name, 'a', 'utf8') as f:
+                result[i].to_csv(f, index=False, header=False)
+        else:
+            result[i].to_csv(out_name, index=False)
+
+
+def main(postfix='.html', batches=100):
+    """
+        信息抽取抽取主程序
+    :return:
+    """
+    # --- 服务器数据 220 ---
+    path = '/data/hadoop/yisun/data/tianchhi2/train/chongzu/html/'
+    filename = None
+    label_file = '/data/hadoop/yisun/data/tianchhi2/train_label/chongzu.train'
+    outpath = '/data/hadoop/yisun/data/tianchhi2/result/train/chongzu/'
+    # # --- 本地外部数据 ---
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    # filename = ['148856.html']
+    # outpath = '../data/train_data/output_label/'
+    # # --- 本地数据 ---
+    # path = '../data/temp2/'
+    # filename = None
+    # # filename = ['23599.html']
+    # outpath = '../data/temp2/result/'
+    # label_file = '../data/train_data/train_labels/chongzu.train'
+
+    if filename == None:
+        files_name = os.listdir(path)
+    else:
+        files_name = filename
+    file_list = [i for i in files_name if i.endswith(postfix)]
+    n_files = len(file_list)  # 总文件数
+    n_batch = math.ceil(n_files/batches)
+    batch_head = 0
+    for batch in range(n_batch):
+        _file_list = file_list[batch_head:batch_head+batches]
+        if len(_file_list) == 0:
+            break
+        from_shiyi(path=path, outpath=outpath, filename=_file_list)
+        batch_head = batch_head+batches
+    return
+
 
 
 if __name__ == '__main__':
-    from_shiyi()
+    main(batches=100)
     pass
