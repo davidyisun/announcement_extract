@@ -339,34 +339,41 @@ def to_file_tree(content_list):
     return
 
 
-class file_tree(object):
-    def __init__(self, mulu, shiyi, zhongdashixiangtishi, content_list):
-        self.mulu = mulu
-        self.shiyi = shiyi
-        self.zhongdashixiangtishi = zhongdashixiangtishi
-        self.content = content_list
-        self.types = [i['type'] for i in content_list]
-        self.contents = [i['content'] for i in content_list]
+class FileTree(object):
+    def __init__(self, mulu=[], shiyi={}, zhongdashixiangtishi='', content_list=[]):
+        """
+            初始化
+        :param mulu: list 目录
+        :param shiyi: dict 释义
+        :param zhongdashixiangtishi: str 重大事项提示
+        :param content_list: list 正文
+        """
+        self.mulu = mulu   # 文档目录
+        self.shiyi = shiyi    # 文档释义
+        self.zhongdashixiangtishi = zhongdashixiangtishi    # 文档重大事项提示
+        self.contents = content_list     # 文档内容
+        self.types = [i['type'] for i in content_list]      # 文档各内容类型
+        self.contents_text = [i['content'] for i in content_list]        # 文档文段内容
+        # 文档结构
+        _titles = ['title_zhang', 'title_jie', 'title_h1', 'title_h1_', 'title_h2']
+        if 'title_h1' in self.types and 'title_h1_' in self.types:
+            if self.types.index('title_h1') > self.types.index('title_h1_'):
+                _titles = ['title_zhang', 'title_jie', 'title_h1_', 'title_h1', 'title_h2']
+        self.titles = []  # 文档title
+        for i, _title in enumerate(_titles):
+            if _title in self.types:
+                self.titles.append(_title)
+        self.depth = len(self.titles)  # 文档最大深度
+
     def get_file_tree(self):
         """
             ---> 文档树结构
         :return:
         """
-        # 确定title层级
-        _titles = ['title_zhang', 'title_jie', 'title_h1', 'title_h1_', 'title_h2']
-        if 'title_h1' in self.types and 'title_h1_' in self.types:
-            if self.types.index('title_h1') > self.types.index('title_h1_'):
-                _titles = ['title_zhang', 'title_jie', 'title_h1_', 'title_h1', 'title_h2']
-        structure = []
-        for i, _title in enumerate(_titles):
-            if _title in self.types:
-                structure.append(_title)
-        self.depth = len(structure)  # 文档最大深度
-        _content = self.content
         # 切割文段
-        res = self._recursion_tree(content=_content, title=structure+['aaaa'])
+        res = self._recursion_tree(content=self.contents, title=self.titles+['aaaa'])
+        self._file_tree = res
         return res
-
 
     def _recursion_tree(self, content, title):
         _content = copy.deepcopy(content)
@@ -404,7 +411,6 @@ class file_tree(object):
                             'content': sub_res})
         return res
 
-
     def get_tree_list(self):
         """
             ---> title线性list结构
@@ -423,8 +429,8 @@ class file_tree(object):
         _content = self.content
         # 切割文段
         res = self._recursion_tree_list(content=_content, title=structure+['aaaa'])
+        self.tree_list = res
         return res
-
 
     def _recursion_tree_list(self, content, title):
         _content = copy.deepcopy(content)

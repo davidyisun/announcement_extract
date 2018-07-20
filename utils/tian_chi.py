@@ -54,7 +54,7 @@ def extract_pre_content(tag):
         抽取 天池 html 的 目录 风险提示 释义 和正文
     :param tag:
     :return:
-        mulu --- list 目录
+        mulu --- list 目录 元素为str
         shiyi_dict --- dict 释义
         major_promption --- str 重大事项提示
         tag --- tag 余下的tag
@@ -94,6 +94,7 @@ def extract_pre_content(tag):
         major_promption = mp_tag.get_text()
         mp_tag.decompose()
     return mulu, shiyi_dict, major_promption, tag
+
 
 # 获取text信息
 def get_content(tag):
