@@ -36,6 +36,7 @@ def from_shiyi():
     result_mark_com = []
     result_jiaoyiduifang = []
     for i, index in enumerate(data):
+        print('extracting from shiyi --- total: {0} --- this: {1} --- file: {2}'.format(len(data), i, index))
         file = data[index]
         ExtractDevice = chongzu.ExtractDevice(shiyi=file['shiyi'])
         ExtractDevice.extract_from_shiyi()
