@@ -71,8 +71,8 @@ def main(postfix='.html', batches=100):
     label_file = '/data/hadoop/yisun/data/tianchhi2/train_label/chongzu.train'
     outpath = '/data/hadoop/yisun/data/tianchhi2/result/train/chongzu/'
     # --- 本地外部数据 ---
-    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = ['130794.html']
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    # filename = ['130794.html']
     # # --- 本地数据 ---
     # path = '../data/temp2/'
     # filename = None
@@ -107,5 +107,5 @@ def delete_ouput():
 
 
 if __name__ == '__main__':
-    main(batches=100)
+    main(batches=20)
     pass
