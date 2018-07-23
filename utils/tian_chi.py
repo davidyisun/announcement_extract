@@ -94,7 +94,8 @@ def extract_pre_content(tag):
         tables = []
         shiyi_tag = shiyi_tag[0]
         for i in shiyi_tag.find_all('table'):
-            if re.findall(re.compile('指'), i.get_text()) != []:
+            if len(i.find_all('td', '^ *指 *$')) > 5:
+            # if re.findall(re.compile('指'), i.get_text()) != []:
                 tables.append(i)
         table = []
         for _table in tables:
