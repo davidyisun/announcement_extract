@@ -6,16 +6,6 @@ Created on 2018-06-13
 @author:David Yisun
 @group:data
 """
-
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-"""
-    脚本名:单个html test
-Created on 2018-06-12
-@author:David Yisun
-@group:data
-@contact:davidhu@wezhuiyi.com
-"""
 import codecs
 from bs4 import BeautifulSoup
 import os
