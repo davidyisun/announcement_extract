@@ -57,6 +57,7 @@ def from_shiyi(path, filename, outpath, result_append=True):
                 result[i].to_csv(f, index=False, header=False)
         else:
             result[i].to_csv(out_name, index=False)
+    return
 
 
 def main(postfix='.html', batches=100):
@@ -90,10 +91,7 @@ def main(postfix='.html', batches=100):
     # 清除已有result文件
     f = [outpath+i for i in os.listdir(outpath)]
     for i in f:
-        try:
-            os.remove(i)
-        except:
-            pass
+        os.remove(i)
     # 批量写入
     for batch in range(n_batch):
         _file_list = file_list[batch_head:batch_head+batches]
@@ -102,6 +100,10 @@ def main(postfix='.html', batches=100):
         from_shiyi(path=path, outpath=outpath, filename=_file_list)
         batch_head = batch_head+batches
     return
+
+
+def delete_ouput():
+    pass
 
 
 if __name__ == '__main__':
