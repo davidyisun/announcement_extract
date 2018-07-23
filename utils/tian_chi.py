@@ -89,12 +89,12 @@ def extract_pre_content(tag):
         mulu_tag.decompose()
     # 获取【释义】
     shiyi_dict = {}
-    shiyi_tag = tag.find_all('div', title=re.compile('释 *义'))
+    shiyi_tag = tag.find_all('div', title=re.compile('释 *义|^第.{1,3}释 *义'))
     if shiyi_tag != []:
         tables = []
         shiyi_tag = shiyi_tag[0]
         for i in shiyi_tag.find_all('table'):
-            if len(i.find_all('td', '^ *指 *$')) > 5:
+            if len(i.find_all('td', text=re.compile('^ *指 *$'))) > 5:
             # if re.findall(re.compile('指'), i.get_text()) != []:
                 tables.append(i)
         table = []

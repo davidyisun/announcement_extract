@@ -151,13 +151,14 @@ if __name__ == '__main__':
     outpath = '/data/hadoop/yisun/data/tianchhi2/output/train_chongzu/'
     # --- 本地外部数据 ---
     path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = '148856.html'
+    filename = ['148856.html']
     outpath = '../data/train_data/output_label/'
     # --- 本地数据 ---
-    # path = '../data/temp2/'
+    path = '../data/temp2/'
     # filename = None
-    # # filename = '23599.html'
-    # outpath = '../data/temp2/'
+    filename = ['30860.html']
+    outpath = '../data/temp2/'
     label_file = '../data/train_data/train_labels/chongzu.train'
     d = get_file_tree(path=path, filename=filename, method='tree')
+    d2 = get_file_tree(path=path, filename=filename, method='list')
     pass

@@ -426,7 +426,7 @@ class FileTree(object):
             if _title in self.types:
                 structure.append(_title)
         self.depth = len(structure)  # 文档最大深度
-        _content = self.content
+        _content = self.contents
         # 切割文段
         res = self._recursion_tree_list(content=_content, title=structure+['aaaa'])
         self.tree_list = res
