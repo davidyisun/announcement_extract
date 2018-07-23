@@ -6,7 +6,6 @@
 Created on 2018-06-27
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 
 import os

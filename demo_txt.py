@@ -5,7 +5,6 @@
 Created on 2018-06-28
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import copy
 import os

@@ -5,7 +5,6 @@
 Created on 2018-07-19
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import sys
 sys.path.append('../')

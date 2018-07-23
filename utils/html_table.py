@@ -5,7 +5,6 @@
 Created on 2018-07-17
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import pandas as pd
 import numpy as np

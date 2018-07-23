@@ -5,7 +5,6 @@
 Created on 2018-07-10
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import re
 def unit_recognize(text):

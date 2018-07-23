@@ -5,7 +5,6 @@
 Created on 2018-07-06
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 # --- common ---
 # --- increase_or_decrease --- 增减持 ---

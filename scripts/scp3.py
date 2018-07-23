@@ -5,7 +5,6 @@
 Created on 2018-07-02
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 from bs4 import BeautifulSoup
 def t():

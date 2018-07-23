@@ -5,7 +5,6 @@
 Created on 2018-07-09
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import extract.increase_or_decrease as id
 import pandas as pd

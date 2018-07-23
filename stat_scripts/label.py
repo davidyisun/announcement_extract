@@ -5,7 +5,6 @@
 Created on 2018-07-06
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import pandas as pd
 path = './data/train_data/train_labels/'

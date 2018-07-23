@@ -5,7 +5,6 @@
 Created on 2018-06-13
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 import os
 from bs4 import BeautifulSoup

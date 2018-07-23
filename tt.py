@@ -6,7 +6,6 @@
 Created on 2018--
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 from multiprocessing import Pool
 import time

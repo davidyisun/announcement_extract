@@ -5,7 +5,6 @@
 Created on 2018-07-17
 @author:David Yisun
 @group:data
-@contact:davidhu@wezhuiyi.com
 """
 from utils import tian_chi as tc, content_format as cf
 def t1(drop_table=False):
