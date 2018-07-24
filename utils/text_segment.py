@@ -77,7 +77,7 @@ def save_data(content_object_dict, outpath):
 
 def content_segment(postfix='.html', batches=20):
     # --- 服务器数据 220 ---
-    path = '/data/hadoop/yisun/data/tianchhi2/train/chongzu/html/'
+    path = '/data/hadoop/yisun/data/tianchi2/train/chongzu/html/'
     filename = None
     # filename = ['20546245.html']
     outpath = '/data/hadoop/yisun/data/tianchi2/train_data_segment/chongzu/'
