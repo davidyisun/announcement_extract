@@ -258,7 +258,11 @@ def check_table(type, content, df_json=False):
     if type in ['table_trs']:
         table_trs = True
         res = []
-        table_list = table_processing(content, df_json)
+        try:
+            table_list = table_processing(content, df_json)
+        except IndexError:  # 不规范的表格
+            table_list = 'buguifanbiaoge'
+            return table_trs, table_list
         if table_list == 'normalize failed':
             # 转换失败
             return table_trs, table_list
@@ -298,7 +302,7 @@ def tags_format(tags_list, df_json=False):
         _pre_type = cur_type
         if not ismerge:
             is_trans_table_trs, content = check_table(pre_type, pre_content, df_json)
-            if content == 'normalize failed':
+            if content in ['normalize failed', 'buguifanbiaoge']:
                 # 转换失败
                 part_table = True
                 file_failed.append(pre_content)
@@ -319,10 +323,11 @@ def tags_format(tags_list, df_json=False):
 
     if cur_type == 'table_trs':
         is_trans_table_trs, content = check_table(cur_type, cur_content, df_json=True)
-        if contents != []:
-            _content = _check_title_merge(contents[-1], content)
-        else:
-            _content = content
+        if content not in ['normalize failed', 'buguifanbiaoge']:
+            if contents != []:
+                _content = _check_title_merge(contents[-1], content)
+            else:
+                _content = content
     else:
         _content = [{'content': cur_content, 'type': pre_type}]
     contents = contents + _content

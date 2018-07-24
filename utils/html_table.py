@@ -9,6 +9,7 @@ Created on 2018-07-17
 import pandas as pd
 import numpy as np
 import copy
+import copy
 
 
 def tr_processing(tr):
@@ -147,7 +148,7 @@ def cell_location(_np_array, n_row, n_col):
     return [i, j]
 
 
-def parser_table(trs_dict, main_title, df_json=False):
+def parser_table(_trs_dict, main_title, df_json=False):
     """
         单表解析
     :param trs_dict:
@@ -157,6 +158,7 @@ def parser_table(trs_dict, main_title, df_json=False):
     """
     title = ''
     content = []
+    trs_dict = copy.deepcopy(_trs_dict)
     if find_title(trs_dict[0]) != -1:
         title = find_title(trs_dict[0])
         trs_dict.pop(0)
@@ -165,9 +167,9 @@ def parser_table(trs_dict, main_title, df_json=False):
     # 检查多列子表 和 单表
     _tr = trs_dict[0]
     if _tr['all_has_multi_colspan'] and _tr['tr_most_rowspan'] == 1:
-        type = 'multi_col_tables'  # 多列子表
-        _table_col = _tr['tr_cols'] # 列
-        _table_row = len(trs_dict) # 行
+        type = 'multi_col_tables'   #  多列子表
+        _table_col = _tr['tr_cols']  #  列
+        _table_row = len(trs_dict)  #  行
         try:
             # 转换失败
             _table, _trs_left = trs_formalized(trs_dict, array_shape=(_table_row, _table_col))
@@ -195,8 +197,8 @@ def parser_table(trs_dict, main_title, df_json=False):
             table.pop(0)
         sub_title = main_title+_title
         # 找 headers
-        _tr = table[0]  # 取首列 定大小
-        n_col = _tr['tr_cols']  # 矩阵列数
+        _tr = table[0]  #  取首列 定大小
+        n_col = _tr['tr_cols']  #  矩阵列数
         try:
             headers_array, table = trs_formalized(table, array_shape=(_tr['tr_most_rowspan'], _tr['tr_cols']))
         except Exception as e:
@@ -277,18 +279,18 @@ def table_processing(trs_list, df_json=False):
     :param df_json: bool 是否以json形式存储dataframe
     :return:
     """
-    main_title = ''  # 表名
+    main_title = ''  #  表名
     tables = []
     # 计算表的基本信息
     cols = 0
     trs_content = []
     for i, tr in enumerate(trs_list):
         tr_info = tr_processing(tr)
-        cols = max(cols, tr_info['tr_cols'])
+        trs_content.append(tr_info)
         # 过滤空行
         if tr_info['tr_text'] in ['', ' ']:
             continue
-        trs_content.append(tr_info)
+        cols = max(cols, tr_info['tr_cols'])
     # 切表 按行
     _table = []
     trs_content.reverse()  # 倒序检索 分割表格
@@ -303,10 +305,10 @@ def table_processing(trs_list, df_json=False):
         tables.append(_table)  # append最前一个表
     tables.reverse()  # 还原顺序
     # 解析表格
-    title_append = True # 总标题append开关
+    title_append = True  # 总标题append开关
     # 寻找主标题
     while title_append:
-        if len(tables) == 0: # 表头走完 假表
+        if len(tables) == 0:  # 表头走完 假表
             title_append = False
             continue
         if len(tables[0]) != 1:  # 遍历完tables
