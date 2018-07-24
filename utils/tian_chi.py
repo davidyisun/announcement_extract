@@ -103,6 +103,8 @@ def extract_pre_content(tag):
         if len(table) >0:
             shiyi_list = html_table.table2mat(table).tolist()
         for i in shiyi_list:
+            if None in i:
+                continue
             key = i[0].split('、')
             value = i[2]
             _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
