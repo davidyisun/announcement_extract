@@ -59,7 +59,7 @@ def save_data(content_object_dict, outpath):
             with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree', index.replace('.html', '')), 'a', 'utf8') as f:
                 content_tree = json.dumps({'content': data.file_tree})
                 f.write(content_tree)
-        except:
+        except FileNotFoundError:
             with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree', index.replace('.html', '')), 'r', 'utf8') as f:
                 content_tree = json.dumps({'content': data.file_tree})
                 f.write(content_tree)
