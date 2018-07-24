@@ -80,10 +80,10 @@ def main(postfix='.html', batches=100):
     outpath = '../data/temp2/result/'
 
     # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['20546245.html']
-    # label_file = '../data/train_data/train_labels/chongzu.train'
-    # outpath = '../data/temp2/result/'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['20546245.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/temp2/result/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'
