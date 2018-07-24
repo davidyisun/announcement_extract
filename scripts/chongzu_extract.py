@@ -49,7 +49,6 @@ def from_shiyi(path, filename, outpath, result_append=True):
               'mark_com': df_mark_com,
               'jiaoyiduifang': df_jiaoyiduifang}
     out_names = ['mark', 'mark_com', 'jiaoyiduifang']
-
     for i in out_names:
         out_name = outpath+i+'.csv'
         if result_append:
@@ -60,7 +59,7 @@ def from_shiyi(path, filename, outpath, result_append=True):
     return
 
 
-def main(postfix='.html', batches=100):
+def main(postfix='.html', batches=20):
     """
         信息抽取抽取主程序
     :return:
@@ -81,14 +80,14 @@ def main(postfix='.html', batches=100):
 
     # # --- 本地外部数据 ---
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['20546245.html']
+    # filename = ['19223567.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/temp2/result/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'
     # filename = None
-    # filename = ['20237487.html']
+    # filename = ['19223567.html']
     # outpath = '../data/temp2/result/'
     # label_file = '../data/train_data/train_labels/chongzu.train'
 
@@ -111,7 +110,7 @@ def main(postfix='.html', batches=100):
             break
         from_shiyi(path=path, outpath=outpath, filename=_file_list)
         batch_head = batch_head+batches
-        print('total: {0} --- has been processed: {1}'.format(len(file_list), batch_head))
+        print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
     return
 
 

@@ -90,18 +90,16 @@ def extract_pre_content(tag):
     shiyi_dict = {}
     shiyi_tag = tag.find_all('div', title=re.compile('释 *义|^第.{1,3}释 *义'))
     if shiyi_tag != []:
-        tables = []
+        trs = []
         shiyi_tag = shiyi_tag[0]
-        for i in shiyi_tag.find_all('table'):
-            if len(i.find_all('td', text=re.compile('^ *指 *$'))) > 5:
+        for i in shiyi_tag.find_all('tr'):
+            if len(i.find_all('td', text=re.compile('^ *指 *$'))) == 1 and len(i.find_all('td')) == 3:
+
             # if re.findall(re.compile('指'), i.get_text()) != []:
-                tables.append(i)
-        table = []
-        for _table in tables:
-            table = table+_table.find_all('tr')
+                trs.append(i)
         shiyi_list = []
-        if len(table) >0:
-            shiyi_list = html_table.table2mat(table).tolist()
+        if len(trs) >0:
+            shiyi_list = html_table.table2mat(trs).tolist()
         for i in shiyi_list:
             if None in i:
                 continue

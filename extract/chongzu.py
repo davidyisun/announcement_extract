@@ -98,7 +98,6 @@ def get_file_tree(path, filename, drop_table=False, method='list'):
         mulu, shiyi_dict, major_promption, tag = tian_chi.extract_pre_content(h)
         _content = tian_chi.get_content(tag)
         _content, part_table, table_failed = content_format.tags_format(_content)
-
         content = {'mulu': mulu,
                    'shiyi': shiyi_dict,
                    'major_promption': major_promption,
@@ -109,7 +108,10 @@ def get_file_tree(path, filename, drop_table=False, method='list'):
         # data = res.get_file_tree()
         if method == 'tree':
             res.get_file_tree()
-        else:
+        if method == 'list':
+            res.get_tree_list()
+        if method == 'both':
+            res.get_file_tree()
             res.get_tree_list()
         data[index] = res
     return data
