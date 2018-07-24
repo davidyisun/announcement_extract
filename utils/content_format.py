@@ -243,11 +243,12 @@ def _check_title_merge(pre_content, content):
 
 
 # 检查是否处理表格类型数据 html ---> table_dict
-def check_table(type, content):
+def check_table(type, content, df_json=False):
     """
         检查数据是否为表格
     :param type:
     :param content: trs_tag 形式
+    :param df_json: bool 是否以json形式存储dataframe
     :return:
     """
     table_trs = False
@@ -257,7 +258,7 @@ def check_table(type, content):
     if type in ['table_trs']:
         table_trs = True
         res = []
-        table_list = table_processing(content)
+        table_list = table_processing(content, df_json)
         if table_list == 'normalize failed':
             # 转换失败
             return table_trs, table_list
@@ -274,10 +275,11 @@ def check_table(type, content):
 
 
 # html tags ----> content_list 主函数
-def tags_format(tags_list):
+def tags_format(tags_list, df_json=False):
     """
-        tags转换
+        tags 转换
     :param tags_list: list 有tags组成的list
+    :param df_json: bool 是否以json形式存储dataframe
     :return:
     """
     part_table = False  # 是否有残表
@@ -295,7 +297,7 @@ def tags_format(tags_list):
         _pre_content = cur_content
         _pre_type = cur_type
         if not ismerge:
-            is_trans_table_trs, content = check_table(pre_type, pre_content)
+            is_trans_table_trs, content = check_table(pre_type, pre_content, df_json)
             if content == 'normalize failed':
                 # 转换失败
                 part_table = True
@@ -316,7 +318,7 @@ def tags_format(tags_list):
         pre_content = _pre_content
 
     if cur_type == 'table_trs':
-        is_trans_table_trs, content = check_table(cur_type, cur_content)
+        is_trans_table_trs, content = check_table(cur_type, cur_content, df_json=True)
         if contents != []:
             _content = _check_title_merge(contents[-1], content)
         else:
@@ -363,6 +365,8 @@ class FileTree(object):
             if _title in self.types:
                 self.titles.append(_title)
         self.depth = len(self.titles)  # 文档最大深度
+        self.file_tree = ''
+        self.tree_list = []
 
     def get_file_tree(self):
         """
@@ -371,7 +375,7 @@ class FileTree(object):
         """
         # 切割文段
         res = self._recursion_tree(content=self.contents, title=self.titles+['aaaa'])
-        self._file_tree = res
+        self.file_tree = res
         return res
 
     def _recursion_tree(self, content, title):

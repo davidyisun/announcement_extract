@@ -83,7 +83,7 @@ def get_pre_content(path, filename, drop_table=False, keys=['mulu', 'shiyi', 'ma
     return contents
 
 
-def get_file_tree(path, filename, drop_table=False, method='list'):
+def get_file_tree(path, filename, drop_table=False, method='list', df_json=False):
     # --- pre_main ---
     html_dict = tian_chi.read_html(filepath=path, filename=filename)
     contents = {}
@@ -97,7 +97,7 @@ def get_file_tree(path, filename, drop_table=False, method='list'):
                 i.decompose()
         mulu, shiyi_dict, major_promption, tag = tian_chi.extract_pre_content(h)
         _content = tian_chi.get_content(tag)
-        _content, part_table, table_failed = content_format.tags_format(_content)
+        _content, part_table, table_failed = content_format.tags_format(_content, df_json=df_json)
         content = {'mulu': mulu,
                    'shiyi': shiyi_dict,
                    'major_promption': major_promption,

@@ -147,10 +147,12 @@ def cell_location(_np_array, n_row, n_col):
     return [i, j]
 
 
-def parser_table(trs_dict, main_title):
+def parser_table(trs_dict, main_title, df_json=False):
     """
         单表解析
-    :param trs_text:
+    :param trs_dict:
+    :param main_title: str title 前缀
+    :param df_json: bool 是否以json形式存储dataframe
     :return:
     """
     title = ''
@@ -173,10 +175,14 @@ def parser_table(trs_dict, main_title):
             print('the Exception:', e)
             return 'normalize failed'
         _table = pd.DataFrame(_table)
+        if df_json:
+            df = _table.to_json()
+        else:
+            df = _table
         return [{'title': main_title,
                  'type': type,
                  'headers': [],
-                 'df': _table}]
+                 'df': df}]
     else:
         tables = [trs_dict]
         type = 'single_table'
@@ -202,7 +208,10 @@ def parser_table(trs_dict, main_title):
             for k, j in enumerate(i):
                 if j not in _h_list:
                     _h_list.append(j)
-            _headers_list.append('-'.join(_h_list))
+            try:
+                _headers_list.append('-'.join(_h_list))
+            except:
+                pass
         # 找 table
         table_row = len(table)
         table_col = headers_array.shape[1]
@@ -225,6 +234,10 @@ def parser_table(trs_dict, main_title):
                 df[head] = new_col
             else:
                 df[head] = table_array[:, i].astype(np.str)
+        if df_json:
+            df = df.to_json()
+        else:
+            df = df
         content.append({'title': sub_title,
                         'type': type,
                         'headers': _headers_list,
@@ -257,10 +270,11 @@ def table2mat(trs):
     return _table
 
 
-def table_processing(trs_list):
+def table_processing(trs_list, df_json=False):
     """
         对trs以list的形式parser
     :param trs_list: html tr标签 list
+    :param df_json: bool 是否以json形式存储dataframe
     :return:
     """
     main_title = ''  # 表名
@@ -320,10 +334,14 @@ def table_processing(trs_list):
             print('the Exception:', e)
             return 'normalize failed'
         _table = pd.DataFrame(_table)
+        if df_json:
+            df = _table.to_json()
+        else:
+            df = _table
         return [{'title': main_title,
                  'type': table_type,
                  'headers': [],
-                 'df': _table}]
+                 'df': df}]
     # 单表解析
-    table_parsed = parser_table(tables[0], main_title)
+    table_parsed = parser_table(tables[0], main_title, df_json)
     return table_parsed
