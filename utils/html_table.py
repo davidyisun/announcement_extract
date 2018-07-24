@@ -89,7 +89,7 @@ def td_processing(td):
 
 def trs_formalized(trs_dict, array_shape):
     """
-        填表
+        填表 (转换方式应考虑换行的情况)
     :param trs_dict: dict trs字典对象 自定义
     :param array_shape:  tuple 需要填充的table的shape
     :return:
@@ -101,20 +101,23 @@ def trs_formalized(trs_dict, array_shape):
     j = 0
     table = copy.deepcopy(trs_dict)
     while None in out_array:
-        _tr = table[0]
-        table.pop(0)
-        for td in _tr['tr_content']:
-            end_i = td.shape[0] + i
-            end_j = td.shape[1] + j
-            out_array[i:end_i, j:end_j] = td
-            # 定位下一个空单元格
-            _next_cell = cell_location(out_array, out_array.shape[0], out_array.shape[1])
-            if _next_cell == 'filling_full':
-                # 填完array
-                break
-            # 更新坐标
-            i = _next_cell[0]
-            j = _next_cell[1]
+        try:
+            _tr = table[0]
+            table.pop(0)
+            for td in _tr['tr_content']:
+                end_i = td.shape[0] + i
+                end_j = td.shape[1] + j
+                out_array[i:end_i, j:end_j] = td
+                # 定位下一个空单元格
+                _next_cell = cell_location(out_array, out_array.shape[0], out_array.shape[1])
+                if _next_cell == 'filling_full':
+                    # 填完array
+                    break
+                # 更新坐标
+                i = _next_cell[0]
+                j = _next_cell[1]
+        except:
+            break
     return out_array, table
 
 
