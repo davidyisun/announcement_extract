@@ -83,10 +83,10 @@ def content_segment(postfix='.html', batches=20):
     outpath = '/data/hadoop/yisun/data/tianchi2/train_data_segment/chongzu/'
 
     # # --- 天池服务器
-    path = '/home/118_16/data/chongzu_train_html/'
-    filename = None
-    # filename = ['20546245.html']
-    outpath = '/home/118_16/data/chongzu_segment/'
+    # path = '/home/118_16/data/chongzu_train_html/'
+    # filename = None
+    # # filename = ['20546245.html']
+    # outpath = '/home/118_16/data/chongzu_segment/'
 
 
     # --- 本地外部数据 ---
@@ -108,7 +108,7 @@ def content_segment(postfix='.html', batches=20):
     n_files = len(file_list)  # 总文件数
     n_batch = math.ceil(n_files / batches)
     batch_head = 0
-    # file_list.reverse()
+    file_list.reverse()
 
     # 批处理
     for batch in range(n_batch):
