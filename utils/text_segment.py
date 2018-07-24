@@ -80,24 +80,25 @@ def content_segment(postfix='.html', batches=20):
     path = '/data/hadoop/yisun/data/tianchhi2/train/chongzu/html/'
     filename = None
     # filename = ['20546245.html']
-    outpath = '/data/hadoop/yisun/data/tianchhi2/result/train/chongzu/'
+    outpath = '/data/hadoop/yisun/data/tianchi2/train_data_segment/chongzu/'
 
     # --- 天池服务器
     path = '/home/118_16/data/chongzu_train_html/'
     filename = None
     # filename = ['20546245.html']
-    outpath = '../data/temp2/result/'
+    outpath = '/home/118_16/data/chongzu_segment/'
 
-    # --- 本地外部数据 ---
-    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = ['20546245.html']
-    outpath = '../data/temp2/result/'
 
-    # --- 本地数据 ---
-    path = '../data/temp2/'
-    filename = None
-    filename = ['9945.html']
-    outpath = '../sub_dataset/chongzu/'
+    # # --- 本地外部数据 ---
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    # filename = ['20546245.html']
+    # outpath = '../data/temp2/result/'
+    #
+    # # --- 本地数据 ---
+    # path = '../data/temp2/'
+    # filename = None
+    # filename = ['9945.html']
+    # outpath = '../sub_dataset/chongzu/'
 
     if filename == None:
         files_name = os.listdir(path)
