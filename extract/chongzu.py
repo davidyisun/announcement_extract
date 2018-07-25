@@ -58,6 +58,15 @@ def html2file_tree(html, drop_table=False):
 
 
 def get_pre_content(path, filename, drop_table=False, keys=['mulu', 'shiyi', 'major_promption', 'content'], text_trans=False):
+    """
+        获取文件的预信息
+    :param path:
+    :param filename:
+    :param drop_table:
+    :param keys:
+    :param text_trans:
+    :return:
+    """
     html_dict = tian_chi.read_html(filepath=path, filename=filename)
     contents = {}
     for n, index in enumerate(html_dict):
@@ -126,7 +135,7 @@ class ExtractDevice(content_format.FileTree):
         mark = []
         mark_com = []
         jiaoyiduifang = []
-        reg_mark = re.compile('交易标的')
+        reg_mark = re.compile('交易标的|标的资产|标的股权')
         reg_mark_com = re.compile('标的公司')
         reg_jiaoyiduifang = re.compile('交易对方')
         for key in self.shiyi:
@@ -136,10 +145,11 @@ class ExtractDevice(content_format.FileTree):
                 mark_com.append([key, self.shiyi[key]])
             if re.findall(reg_jiaoyiduifang, key) != []:
                 jiaoyiduifang.append([key, self.shiyi[key]])
-        self.mark = mark
-        self.mark_com = mark_com
-        self.jiaoyiduifang = jiaoyiduifang
-
+        # 去重赋值
+        self.mark = list(set(mark))
+        self.mark_com = list(set(mark_com))
+        self.jiaoyiduifang = list(set(jiaoyiduifang))
+        pass
 
 def extract_info(tree_list):
     pass

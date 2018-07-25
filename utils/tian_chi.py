@@ -78,6 +78,49 @@ def extract_pre_content(tag):
         major_promption --- str 重大事项提示
         tag --- tag 余下的tag
     """
+    # 获取【释义】
+    shiyi_dict = {}
+    # --- 方法一 ---
+    ShiYi_tag = tag.find_all('div', title=re.compile('释 *义'))
+    if ShiYi_tag != []:
+        for shiyi_tag in ShiYi_tag:
+            trs = []
+            if len(shiyi_tag.find_all('td', text=re.compile('^ *指 *$'))) < 4:
+                continue
+            for i in shiyi_tag.find_all('tr'):
+                if len(i.find_all('td', text=re.compile('^ *指 *$'))) == 1 and len(i.find_all('td')) == 3:
+                # if re.findall(re.compile('指'), i.get_text()) != []:
+                    trs.append(i)
+            shiyi_list = []
+            if len(trs) >0:
+                shiyi_list = html_table.table2mat(trs).tolist()
+            for i in shiyi_list:
+                if None in i:
+                    continue
+                key = i[0].split('、')
+                value = i[2]
+                _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
+                shiyi_dict.update(_kv)
+            shiyi_tag.decompose()
+    # --- 方法二 --- 直接检索 table 标签
+    _trs = tag.find_all('tr')
+    for shiyi_tr in _trs:
+        shiyi_trs = []
+        if len(shiyi_tr.find_all('td', text=re.compile('^ *指 *$'))) == 1 and len(shiyi_tr.find_all('td')) == 3:
+            shiyi_trs.append(shiyi_tr)
+        else:
+            continue
+        shiyi_list = []
+        if len(shiyi_trs) > 0:
+            shiyi_list = html_table.table2mat(shiyi_trs).tolist()
+        for i in shiyi_list:
+            if None in i:
+                continue
+            key = re.split(re.compile('、|/'), i[0])
+            value = i[2]
+            _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
+            shiyi_dict.update(_kv)
+        shiyi_tr.decompose()
     # 获取【目录】
     mulu = []
     mulu_tag = tag.find_all('div', title=re.compile('目 *录'))
@@ -86,28 +129,7 @@ def extract_pre_content(tag):
         for i in mulu_tag.find_all(True, text=True):
             mulu.append(str(i.string).strip())
         mulu_tag.decompose()
-    # 获取【释义】
-    shiyi_dict = {}
-    shiyi_tag = tag.find_all('div', title=re.compile('释 *义|^第.{1,3}释 *义'))
-    if shiyi_tag != []:
-        trs = []
-        shiyi_tag = shiyi_tag[0]
-        for i in shiyi_tag.find_all('tr'):
-            if len(i.find_all('td', text=re.compile('^ *指 *$'))) == 1 and len(i.find_all('td')) == 3:
 
-            # if re.findall(re.compile('指'), i.get_text()) != []:
-                trs.append(i)
-        shiyi_list = []
-        if len(trs) >0:
-            shiyi_list = html_table.table2mat(trs).tolist()
-        for i in shiyi_list:
-            if None in i:
-                continue
-            key = i[0].split('、')
-            value = i[2]
-            _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
-            shiyi_dict.update(_kv)
-        shiyi_tag.decompose()
     # 获取【重大事项提示】
     major_promption = ''
     mp_tag = tag.find_all('div', title=re.compile('重大事项提示'))
