@@ -6,6 +6,8 @@ Created on 2018-07-25
 @author:David Yisun
 @group:data
 """
+import sys
+sys.path.append('../')
 from utils import text_segment
 def main():
     # --- 服务器数据 220 ---
