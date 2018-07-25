@@ -7,6 +7,7 @@ Created on 2018-07-20
 @group:data
 """
 import pandas as pd
+import codecs
 
 
 # 获取label数据
@@ -75,8 +76,19 @@ def fields_compare(df_label, df_result, main_key, fileds, **kwargs):
     outpath = kwargs.get('outpath')
     is_print = kwargs.get('is_print')
     # --- 打印 ---
-    if is_print==True:
+
         # 打印id
+    s = []
+    s1 = '-------------------------------'
+    s2 = 'the possible of ID(标准数据结果数): {0}'.format(res['id']['id_pos'])
+    s3 = 'the actual of ID（抽取数据结果数）: {0}'.format(res['id']['id_act'])
+    s4 = 'the correct of ID(匹配正确数): {0}'.format(res['id']['id_cor'])
+    s5 = 'the recall of ID(召回率): {0}'.format(res['id']['id_recall'])
+    s6 = 'the precision of ID(精确率): {0}'.format(res['id']['id_precision'])
+    s7 = 'the f1 of ID: {0}'.format(res['id']['id_f1'])
+    s = s+ [s1, s1, s2, s3, s4, s5, s6, s7]
+    if is_print==True:
+        print('-------------------------------')
         print('-------------------------------')
         print('the possible of ID(标准数据结果数): {0}'.format(res['id']['id_pos']))
         print('the actual of ID（抽取数据结果数）: {0}'.format(res['id']['id_act']))
@@ -84,21 +96,33 @@ def fields_compare(df_label, df_result, main_key, fileds, **kwargs):
         print('the recall of ID(召回率): {0}'.format(res['id']['id_recall']))
         print('the precision of ID(精确率): {0}'.format(res['id']['id_precision']))
         print('the f1 of ID: {0}'.format(res['id']['id_f1']))
-        if isinstance(outpath, str):
-            res['id']['out_of_id'].to_csv(outpath+'out_of_id.csv', index=False, encoding='utf8')
-            res['id']['not_in_id'].to_csv(outpath+'not_in_id.csv', index=False, encoding='utf8')
+    if isinstance(outpath, str):
+        res['id']['out_of_id'].to_csv(outpath+'out_of_id.csv', index=False, encoding='utf8')
+        res['id']['not_in_id'].to_csv(outpath+'not_in_id.csv', index=False, encoding='utf8')
 
-        # 打印各slot
-        for _fields in res['fileds']:
-            print('-------------------------------')
+    # 打印各slot
+    for _fields in res['fileds']:
+        s1 = '>>>>>>> {0} >>>>>>>>'.format(_fields)
+        s2 = 'the possible of {1}(标准数据结果数): {0}'.format(res['fileds'][_fields]['pos'], _fields)
+        s3 = 'the actual of {1}（抽取数据结果数）: {0}'.format(res['fileds'][_fields]['act'], _fields)
+        s4 = 'the correct of {1}(匹配正确数): {0}'.format(res['fileds'][_fields]['cor'], _fields)
+        s5 = 'the recall of {1}(召回率): {0}'.format(res['fileds'][_fields]['recall'], _fields)
+        s6 = 'the precision of {1}(精确率): {0}'.format(res['fileds'][_fields]['precision'], _fields)
+        s7 = 'the f1 of {1}: {0}'.format(res['fileds'][_fields]['f1'], _fields)
+        s = s + [s1, s2, s3, s4, s5, s6, s7]
+        if is_print:
+            print('>>>>>>> {0} >>>>>>>>'.format(_fields))
             print('the possible of {1}(标准数据结果数): {0}'.format(res['fileds'][_fields]['pos'], _fields))
             print('the actual of {1}（抽取数据结果数）: {0}'.format(res['fileds'][_fields]['act'], _fields))
             print('the correct of {1}(匹配正确数): {0}'.format(res['fileds'][_fields]['cor'], _fields))
             print('the recall of {1}(召回率): {0}'.format(res['fileds'][_fields]['recall'], _fields))
             print('the precision of {1}(精确率): {0}'.format(res['fileds'][_fields]['precision'], _fields))
             print('the f1 of {1}: {0}'.format(res['fileds'][_fields]['f1'], _fields))
-            if isinstance(outpath, str):
-                res['fileds'][_fields]['wrong_filed'].to_csv(outpath + '{0}_wrong.csv'.format(_fields), index=False, encoding='utf8')
-                res['fileds'][_fields]['right_filed'].to_csv(outpath + '{0}_right.csv'.format(_fields), index=False, encoding='utf8')
+        if isinstance(outpath, str):
+            res['fileds'][_fields]['wrong_filed'].to_csv(outpath + '{0}_wrong.csv'.format(_fields), index=False, encoding='utf8')
+            res['fileds'][_fields]['right_filed'].to_csv(outpath + '{0}_right.csv'.format(_fields), index=False, encoding='utf8')
+    if isinstance(outpath, str):
+        with codecs.open(outpath+'result.txt', 'w', 'utf8') as f:
+            f.write('\n'.join(s))
     return res
 

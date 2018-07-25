@@ -24,9 +24,9 @@ def main():
 
 
     # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['16850467.html']
-    # outpath = '../sub_dataset/chongzu/'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['16850467.html']
+    outpath = '../sub_dataset/chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'

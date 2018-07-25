@@ -37,5 +37,5 @@ if __name__ == '__main__':
     res = {}
     for label in label_name[1:2]:
         _result_path = result_path.format(label)
-        res[label] = stat(label_path=label_path, result_path=_result_path, main_key=['id'], other_fields=['mark_com'], is_print=True, outpath=output_path)
+        res[label] = stat(label_path=label_path, result_path=_result_path, main_key=['id'], other_fields=['jiaoyiduifang'], is_print=True, outpath=output_path)
     pass
