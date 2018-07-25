@@ -65,7 +65,7 @@ def main(postfix='.html', batches=20):
     :return:
     """
     # --- 服务器数据 220 ---
-    path = '/data/hadoop/yisun/data/tianchhi2/train/chongzu/html/'
+    path = '/data/hadoop/yisun/data/tianchi2/train/chongzu/html/'
     filename = None
     # filename = ['20546245.html']
     label_file = '/data/hadoop/yisun/data/tianchi2/train_label/chongzu.train'
