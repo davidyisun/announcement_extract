@@ -146,9 +146,9 @@ class ExtractDevice(content_format.FileTree):
             if re.findall(reg_jiaoyiduifang, key) != []:
                 jiaoyiduifang.append([key, self.shiyi[key]])
         # 去重赋值
-        self.mark = list(set(mark))
-        self.mark_com = list(set(mark_com))
-        self.jiaoyiduifang = list(set(jiaoyiduifang))
+        self.mark = mark
+        self.mark_com = mark_com
+        self.jiaoyiduifang = jiaoyiduifang
         pass
 
 def extract_info(tree_list):

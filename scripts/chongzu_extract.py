@@ -40,6 +40,10 @@ def from_shiyi(path, filename, outpath, result_append=True):
             _jiaoyiduifang = [i[1] for i in ExtractDevice.jiaoyiduifang]
             _result = list(itertools.zip_longest([index.replace('.html', '')], _jiaoyiduifang, fillvalue=index.replace('.html', '')))
             result_jiaoyiduifang = result_jiaoyiduifang + _result
+    # 去重赋值
+    result_mark = list(set(result_mark))
+    result_mark_com = list(set(result_mark_com))
+    result_jiaoyiduifang = list(set(result_jiaoyiduifang))
     # to dataframe
     df_mark = pd.DataFrame(result_mark, columns=['id', 'mark'])
     df_mark_com = pd.DataFrame(result_mark_com, columns=['id', 'mark_com'])
@@ -80,7 +84,7 @@ def main(postfix='.html', batches=20):
 
     # # --- 本地外部数据 ---
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['20505659.html']
+    # filename = ['1115409.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 

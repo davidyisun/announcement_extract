@@ -14,11 +14,11 @@ def main():
     # filename = ['20546245.html']
     outpath = '/data/hadoop/yisun/data/tianchi2/train_data_segment/chongzu/'
 
-    # --- 天池服务器
-    path = '/home/118_16/data/chongzu_train_html/'
-    filename = None
-    # filename = ['20546245.html']
-    outpath = '/home/118_16/data/chongzu_segment/'
+    # # --- 天池服务器
+    # path = '/home/118_16/data/chongzu_train_html/'
+    # filename = None
+    # # filename = ['20546245.html']
+    # outpath = '/home/118_16/data/chongzu_segment/'
 
 
     # --- 本地外部数据 ---
