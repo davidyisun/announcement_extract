@@ -69,27 +69,27 @@ def main(postfix='.html', batches=20):
     filename = None
     # filename = ['20546245.html']
     label_file = '/data/hadoop/yisun/data/tianchi2/train_label/chongzu.train'
-    outpath = '/data/hadoop/yisun/data/tianchi2/result/train/chongzu/'
+    outpath = '../data/extract_result/train_chongzu/'
 
-    # # --- 天池服务器
+    # # # --- 天池服务器
     # path = '/home/118_16/data/chongzu_train_html/'
     # filename = None
     # # filename = ['20546245.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
-    # outpath = '../data/temp2/result/'
+    # outpath = '../data/extract_result/train_chongzu/'
 
     # # --- 本地外部数据 ---
-    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = ['20505659.html']
-    label_file = '../data/train_data/train_labels/chongzu.train'
-    outpath = '../data/temp2/result/chongzu/'
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    # filename = ['20505659.html']
+    # label_file = '../data/train_data/train_labels/chongzu.train'
+    # outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'
     # filename = None
     # filename = ['19223567.html']
     # outpath = '../data/temp2/result/'
-    # label_file = '../data/train_data/train_labels/chongzu.train'
+    # label_file = '../data/extract_result/train_chongzu/'
 
     if filename == None:
         files_name = os.listdir(path)

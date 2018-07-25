@@ -75,30 +75,7 @@ def save_data(content_object_dict, outpath):
     return
 
 
-def content_segment(postfix='.html', batches=20):
-    # --- 服务器数据 220 ---
-    path = '/data/hadoop/yisun/data/tianchi2/train/chongzu/html/'
-    filename = None
-    # filename = ['20546245.html']
-    outpath = '/data/hadoop/yisun/data/tianchi2/train_data_segment/chongzu/'
-
-    # # --- 天池服务器
-    # path = '/home/118_16/data/chongzu_train_html/'
-    # filename = None
-    # # filename = ['20546245.html']
-    # outpath = '/home/118_16/data/chongzu_segment/'
-
-
-    # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['16850467.html']
-    # outpath = '../sub_dataset/chongzu/'
-
-    # --- 本地数据 ---
-    # path = '../data/temp2/'
-    # filename = None
-    # filename = ['9945.html']
-    # outpath = '../sub_dataset/chongzu/'
+def content_segment(path, filename, outpath, postfix='.html', batches=20):
 
     if filename == None:
         files_name = os.listdir(path)
@@ -124,5 +101,5 @@ def content_segment(postfix='.html', batches=20):
 
 
 if __name__ == '__main__':
-    content_segment(batches=1)
+    pass
 
