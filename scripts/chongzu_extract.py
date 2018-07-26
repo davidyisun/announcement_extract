@@ -75,18 +75,24 @@ def main(postfix='.html', batches=20):
     label_file = '/data/hadoop/yisun/data/tianchi2/train_label/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
 
-    # # --- 天池服务器
-    path = '/home/118_16/data/chongzu_train_html/'
-    filename = None
-    # filename = ['20546245.html']
-    label_file = '../data/train_data/train_labels/chongzu.train'
-    outpath = '../data/extract_result/train_chongzu/'
-
-    # # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['1115409.html']
+    # # # --- 天池服务器
+    # path = '/home/118_16/data/chongzu_train_html/'
+    # filename = None
+    # # filename = ['20546245.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
+
+    # --- 本地外部数据 thinkpad ---
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    # filename = ['20546245.html']
+    # label_file = '../data/train_data/train_labels/chongzu.train'
+    # outpath = '../data/extract_result/train_chongzu/'
+
+    # --- 本地外部数据 ---
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['20546245.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'
@@ -123,5 +129,5 @@ def delete_ouput():
 
 
 if __name__ == '__main__':
-    main(batches=20)
+    main(batches=1)
     pass

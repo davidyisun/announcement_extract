@@ -135,9 +135,9 @@ class ExtractDevice(content_format.FileTree):
         mark = []
         mark_com = []
         jiaoyiduifang = []
-        reg_mark = re.compile('交易标的|标的资产|标的股权')
-        reg_mark_com = re.compile('标的公司')
-        reg_jiaoyiduifang = re.compile('交易对方')
+        reg_mark = re.compile('交易标的 *$|标的资产 *$|标的股权 *$')
+        reg_mark_com = re.compile('标的公司 *$')
+        reg_jiaoyiduifang = re.compile('交易对方 *$')
         for key in self.shiyi:
             if re.findall(reg_mark, key) != []:
                 mark.append([key, self.shiyi[key]])
