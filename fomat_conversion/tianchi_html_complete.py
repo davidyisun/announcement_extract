@@ -8,6 +8,8 @@ Created on 2018-07-02
 @author:David Yisun
 @group:data
 """
+import sys
+sys.path.append('../')
 import codecs
 from bs4 import BeautifulSoup
 import os
@@ -704,11 +706,16 @@ def check_table_write(content):
 
 
 if __name__ == '__main__':
-    # path = './data/0605/重大合同/html/'
-    # filename = None
-    # outpath = './data/0605_txt/重大合同/'
     file_info = get_path_args()
-    html_dict = read_html2(filepath=file_info['file_path'], filename=file_info['file_name'])
+    path = file_info['file_path']
+    filename = file_info['file_name']
+    outpath = file_info['save_path']
+
+    # path = '../data/temp/'
+    # filename = '5885.html'
+    # outpath = '../data/temp/'
+    file_info = get_path_args()
+    html_dict = read_html2(filepath=path, filename=filename)
     total = 0
     for index in html_dict:
         # 去掉表格tag
@@ -719,7 +726,7 @@ if __name__ == '__main__':
         content = [re.sub(' +', '', i) for i in content]
         content, part_table, table_failed = content_format(content)
         content = [i['content'] for i in content]
-        with codecs.open(file_info['save_path']+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
+        with codecs.open(outpath+index.replace('.html', '.txt'), 'w', 'utf-8') as f:
             print('--- writing {0}'.format(index.replace('.html', '.txt')))
             f.write('\n'.join(content))
             total += 1
