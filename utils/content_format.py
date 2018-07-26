@@ -372,7 +372,7 @@ class FileTree(object):
         self.depth = len(self.titles)  # 文档最大深度
         self.file_tree = ''
         self.tree_list = []
-
+        self.titles = []
     def get_file_tree(self):
         """
             ---> 文档树结构
@@ -438,6 +438,8 @@ class FileTree(object):
         # 切割文段
         res = self._recursion_tree_list(content=_content, title=structure+['aaaa'])
         self.tree_list = res
+        # 获取title
+        self.titles = list(set([i['title'] for i in res]))
         return res
 
     def _recursion_tree_list(self, content, title):

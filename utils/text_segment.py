@@ -72,6 +72,15 @@ def save_data(content_object_dict, outpath):
             with codecs.open(outpath + '{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'r','utf8') as f:
                 content_tree_list = json.dumps({'content': data.file_tree})
                 f.write(content_tree_list)
+        # 存储title结构
+        try:
+            with codecs.open(outpath+'{0}/{1}.txt'.format('titles_list', index.replace('.html', '')), 'a', 'utf8') as f:
+                content_tree_list = json.dumps({'content': data.file_tree})
+                f.write(content_tree_list)
+        except FileNotFoundError:
+            with codecs.open(outpath + '{0}/{1}.txt'.format('titles_list', index.replace('.html', '')), 'r','utf8') as f:
+                content_tree_list = json.dumps({'content': data.file_tree})
+                f.write(content_tree_list)
     return
 
 

@@ -54,12 +54,17 @@ def file_tree_test(postfix='.html'):
     html_dict = tian_chi.read_html(filepath=path, filename=file_list)
     content = {}
     for index in html_dict:
-        _content = tian_chi.extract_pre_content(html_dict[index])[3]
-        __content = tian_chi.get_content(_content)
-
-        t = content_format.FileTree(content_list=__content)
+        # -------------------------- 核心过程 -----------------------------
+        # --- 获取预内容 ---
+        tag = tian_chi.extract_pre_content(html_dict[index])[3]
+        # --- 获取天池text+table ---
+        text_list = tian_chi.get_content(tag)
+        # --- text to text_list
+        _content = content_format.tags_format(tags_list=text_list)[0]
+        # --- 转换为文档树 ---
+        t = content_format.FileTree(content_list=_content)
         t.get_tree_list()
-        content[index] = t.tree_list
+        content[index] = t.titles
     return content
 
 
