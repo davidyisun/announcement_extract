@@ -60,7 +60,7 @@ def from_shiyi(path, filename, outpath, result_append=True):
                 result[i].to_csv(f, index=False, header=False)
         else:
             result[i].to_csv(out_name, index=False)
-    return
+    return result
 
 
 def main(postfix='.html', batches=20):
@@ -83,16 +83,16 @@ def main(postfix='.html', batches=20):
     # outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地外部数据 thinkpad ---
+    path = 'E:\\天池大赛\\公告数据\\天池大赛\\announcement_extract\\复赛数据\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['20546245.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/extract_result/train_chongzu/'
+
+    # --- 本地外部数据 ---
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
     # filename = ['20546245.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
-
-    # --- 本地外部数据 ---
-    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = ['20546245.html']
-    label_file = '../data/train_data/train_labels/chongzu.train'
-    outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'
