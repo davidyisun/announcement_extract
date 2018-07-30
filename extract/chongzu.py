@@ -10,10 +10,7 @@ Created on 2018-07-19
 import sys
 sys.path.append('../')
 from utils import tian_chi, content_format
-from multiprocessing import Pool
 import re
-import os
-import math
 
 
 def html2file_tree(html, drop_table=False):

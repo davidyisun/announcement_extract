@@ -92,7 +92,7 @@ def extract_pre_content(tag):
                 # if re.findall(re.compile('指'), i.get_text()) != []:
                     tr_dict = html_table.tr_processing(i)
                     tr_tds_text = tr_dict['tr_tds_text']
-                    key = tr_tds_text[0].split('、|/')
+                    key = re.split(re.compile('[/、]'), tr_tds_text[0])
                     value = tr_tds_text[2]
                     _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
                     shiyi_dict.update(_kv)
@@ -110,11 +110,10 @@ def extract_pre_content(tag):
     # --- 方法二 --- 直接检索 table 标签
     _trs = tag.find_all('tr')
     for shiyi_tr in _trs:
-        shiyi_trs = []
-        if len(shiyi_tr.find_all('td', text=re.compile('^ *指 *$'))) == 1 and len(shiyi_tr.find_all('td')) == 3:
-            tr_dict = html_table.tr_processing(i)
+        if len(shiyi_tr.find_all(text=re.compile('^ *指 *$'))) == 1 and len(shiyi_tr.find_all('td')) == 3:
+            tr_dict = html_table.tr_processing(shiyi_tr)
             tr_tds_text = tr_dict['tr_tds_text']
-            key = tr_tds_text[0].split('、|/')
+            key = re.split(re.compile('[/、]'), tr_tds_text[0])
             value = tr_tds_text[2]
             _kv = dict(itertools.zip_longest(key, [value], fillvalue=value))
             shiyi_dict.update(_kv)
