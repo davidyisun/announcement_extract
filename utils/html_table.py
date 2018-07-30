@@ -25,6 +25,7 @@ def tr_processing(tr):
     tr_content = []  # 行各单元内容 list
     tr_type = []  # 行各单元格数据类型
     tr_text = tr.get_text() # tr的get.text
+    tr_tds_text = []
     tr_cols = 0  # 行长度
     count_tr_colspan = 0  # colspan大于1的td个数统计
     for td in tds:
@@ -38,6 +39,8 @@ def tr_processing(tr):
         tr_cols = tr_cols+data['td_colspan']
         if data['td_colspan'] > 1:
             count_tr_colspan += 1
+        tr_tds_text.append(data['td_text'])
+
 
     if count_tr_colspan == n_tds:
         all_has_multi_colspan = True
@@ -49,7 +52,8 @@ def tr_processing(tr):
            'all_has_multi_colspan': all_has_multi_colspan,
            'tr_content': tr_content,
            'tr_cols': tr_cols,
-           'tr_text': tr_text}
+           'tr_text': tr_text,
+           'tr_tds_text': tr_tds_text}
     return res
 
 
@@ -58,7 +62,7 @@ def td_processing(td):
         单元格信息
     :param td: tag 单元格
     :return: 字典包括以下：
-        内容 类型 跨列 跨行
+        内容 类型 跨列 跨行 文本信息
         res:
            'td_content': ndarray,
            'td_type': str,
@@ -73,6 +77,7 @@ def td_processing(td):
         td_colspan = int(td['colspan'])
     # -单元格原始text提取
     text = td.get_text().replace(' ', '')
+    text = text.strip()
     # -填充空单元格
     if text == '':
         td_text = '---'
@@ -259,7 +264,7 @@ def find_title(tr_dict):
         return -1
 
 
-def table2mat(trs):
+def table2mat(trs, colspan=True, rowspan=True):
     """
         table直接转换为df no head
     :param trs: beautifulsoup tag

@@ -90,6 +90,7 @@ def extract_pre_content(tag):
             for i in shiyi_tag.find_all('tr'):
                 if len(i.find_all(text=re.compile('^ *指 *$'))) == 1 and len(i.find_all('td')) == 3:
                 # if re.findall(re.compile('指'), i.get_text()) != []:
+
                     trs.append(i)
             shiyi_list = []
             if len(trs) >0:
