@@ -17,7 +17,7 @@ import codecs
 import json
 
 
-def save_data(content_object_dict, outpath):
+def save_data(content_object_dict, outpath, content_need_to_save=['mulu', 'shiyi', 'zhongdashixiangtishi', 'content', 'file_tree', 'tree_list', 'title_list']):
     """
         储存分割的文件
     :param content_object_dict:
@@ -27,64 +27,70 @@ def save_data(content_object_dict, outpath):
     for index in content_object_dict:
         data = content_object_dict[index]
         # 储存释义
-        try:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('shiyi', index.replace('.html', '')), 'a', 'utf8') as f:
-                shiyi = json.dumps({'shiyi': data.shiyi})
-                f.write(shiyi)
-        except FileNotFoundError:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('shiyi', index.replace('.html', '')), 'r', 'utf8') as f:
-                shiyi = json.dumps({'shiyi': data.shiyi})
-                f.write(shiyi)
+        if 'shiyi' in content_need_to_save:
+            try:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('shiyi', index.replace('.html', '')), 'a', 'utf8') as f:
+                    shiyi = json.dumps({'shiyi': data.shiyi})
+                    f.write(shiyi)
+            except FileNotFoundError:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('shiyi', index.replace('.html', '')), 'r', 'utf8') as f:
+                    shiyi = json.dumps({'shiyi': data.shiyi})
+                    f.write(shiyi)
         # 储存重大事项提示
-        try:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('zhongdashixiangtishi', index.replace('.html', '')), 'a', 'utf8') as f:
-                zhongdashixiangtishi = json.dumps({'zhongdashixiangtishi': data.zhongdashixiangtishi})
-                f.write(zhongdashixiangtishi)
-        except FileNotFoundError:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('zhongdashixiangtishi', index.replace('.html', '')), 'r', 'utf8') as f:
-                zhongdashixiangtishi = json.dumps({'zhongdashixiangtishi': data.zhongdashixiangtishi})
-                f.write(zhongdashixiangtishi)
+        if 'zhongdashixiangtishi' in content_need_to_save:
+            try:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('zhongdashixiangtishi', index.replace('.html', '')), 'a', 'utf8') as f:
+                    zhongdashixiangtishi = json.dumps({'zhongdashixiangtishi': data.zhongdashixiangtishi})
+                    f.write(zhongdashixiangtishi)
+            except FileNotFoundError:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('zhongdashixiangtishi', index.replace('.html', '')), 'r', 'utf8') as f:
+                    zhongdashixiangtishi = json.dumps({'zhongdashixiangtishi': data.zhongdashixiangtishi})
+                    f.write(zhongdashixiangtishi)
         # 储存内容
-        try:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('content', index.replace('.html', '')), 'a', 'utf8') as f:
-                content = json.dumps({'content': data.contents})
-                f.write(content)
-        # except:
-        except FileNotFoundError:
-            with codecs.open(outpath + '{0}/{1}.txt'.format('content', index.replace('.html', '')), 'r', 'utf8') as f:
-                content = json.dumps({'content': data.contents})
-                f.write(content)
+        if 'content' in content_need_to_save:
+            try:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('content', index.replace('.html', '')), 'a', 'utf8') as f:
+                    content = json.dumps({'content': data.contents})
+                    f.write(content)
+            # except:
+            except FileNotFoundError:
+                with codecs.open(outpath + '{0}/{1}.txt'.format('content', index.replace('.html', '')), 'r', 'utf8') as f:
+                    content = json.dumps({'content': data.contents})
+                    f.write(content)
         # 储存内容 file_tree
-        try:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree', index.replace('.html', '')), 'a', 'utf8') as f:
-                content_tree = json.dumps({'content': data.file_tree})
-                f.write(content_tree)
-        except FileNotFoundError:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree', index.replace('.html', '')), 'r', 'utf8') as f:
-                content_tree = json.dumps({'content': data.file_tree})
-                f.write(content_tree)
+        if 'file_tree' in content_need_to_save:
+            try:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree', index.replace('.html', '')), 'a', 'utf8') as f:
+                    content_tree = json.dumps({'content': data.file_tree})
+                    f.write(content_tree)
+            except FileNotFoundError:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree', index.replace('.html', '')), 'r', 'utf8') as f:
+                    content_tree = json.dumps({'content': data.file_tree})
+                    f.write(content_tree)
         # 储存内容 tree_list
-        try:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'a', 'utf8') as f:
-                content_tree_list = json.dumps({'content': data.file_tree})
-                f.write(content_tree_list)
-        except FileNotFoundError:
-            with codecs.open(outpath + '{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'r','utf8') as f:
-                content_tree_list = json.dumps({'content': data.file_tree})
-                f.write(content_tree_list)
+        if 'tree_list' in content_need_to_save:
+            try:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'a', 'utf8') as f:
+                    content_tree_list = json.dumps({'content': data.file_tree})
+                    f.write(content_tree_list)
+            except FileNotFoundError:
+                with codecs.open(outpath + '{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'r','utf8') as f:
+                    content_tree_list = json.dumps({'content': data.file_tree})
+                    f.write(content_tree_list)
         # 存储title结构
-        try:
-            with codecs.open(outpath+'{0}/{1}.txt'.format('titles_list', index.replace('.html', '')), 'a', 'utf8') as f:
-                content_tree_list = json.dumps({'content': data.file_tree})
-                f.write(content_tree_list)
-        except FileNotFoundError:
-            with codecs.open(outpath + '{0}/{1}.txt'.format('titles_list', index.replace('.html', '')), 'r','utf8') as f:
-                content_tree_list = json.dumps({'content': data.file_tree})
-                f.write(content_tree_list)
+        if 'title_list' in content_need_to_save:
+            try:
+                with codecs.open(outpath+'{0}/{1}.txt'.format('titles_list', index.replace('.html', '')), 'a', 'utf8') as f:
+                    titles_list = json.dumps({'content': data.titles})
+                    f.write(titles_list)
+            except FileNotFoundError:
+                with codecs.open(outpath + '{0}/{1}.txt'.format('titles_list', index.replace('.html', '')), 'r', 'utf8') as f:
+                    titles_list = json.dumps({'content': data.titles})
+                    f.write(titles_list)
     return
 
 
-def content_segment(path, filename, outpath, postfix='.html', batches=20):
+def content_segment(path, filename, outpath, postfix='.html', batches=20, content_need_to_save=['mulu', 'shiyi', 'zhongdashixiangtishi', 'content', 'file_tree', 'tree_list', 'title_list']):
 
     if filename == None:
         files_name = os.listdir(path)
@@ -103,7 +109,7 @@ def content_segment(path, filename, outpath, postfix='.html', batches=20):
             break
         contents = chongzu.get_file_tree(path=path, filename=_file_list, method='both', df_json=True)
         # 分割数据存储
-        save_data(contents, outpath=outpath)
+        save_data(contents, outpath=outpath, content_need_to_save=content_need_to_save)
         batch_head = batch_head + batches
         print('total: {0} --- has been processed: {1}'.format(len(file_list), batch_head))
     return

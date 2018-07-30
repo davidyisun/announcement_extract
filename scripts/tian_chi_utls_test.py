@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 """
     脚本名: 天池html格式模块测试
-Created on 2018--
+Created on 2018-07-30
 @author:David Yisun
 @group:data
 """
