@@ -129,5 +129,5 @@ def delete_ouput():
 
 
 if __name__ == '__main__':
-    main(batches=1)
+    main(batches=20)
     pass
