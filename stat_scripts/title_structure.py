@@ -43,7 +43,17 @@ def read_title(path=title_path, file_name=filename):
     return title
 
 
+def main_stat():
+    """
+        统计main函数
+    :return:
+    """
+    titles_dict = read_title()
+    for index in titles_dict:
+        pass
+    return
+
 if __name__ == '__main__':
-    data = read_title()
+    main_stat()
     pass
 
