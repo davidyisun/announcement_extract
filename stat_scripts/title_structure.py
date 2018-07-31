@@ -60,6 +60,7 @@ def get_reg(reg, title):
         res = {'title': _title, 'distance': n}
     return res
 
+
 def stat(titles_dict):
     """
         统计main函数

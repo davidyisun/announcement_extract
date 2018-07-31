@@ -421,6 +421,8 @@ class FileTree(object):
 
 
     def get_tree_content(self, strcture=[], reg=True, method='sub_tree'):
+        if self.file_tree == '':
+            self.get_file_tree()
         content = self.file_tree
         res = []
         if reg == True:

@@ -54,7 +54,7 @@ def html2file_tree(html, drop_table=False):
 #     return res
 
 
-def get_pre_content(path, filename, drop_table=False, keys=['mulu', 'shiyi', 'major_promption', 'content'], text_trans=False):
+def get_pre_content(path, filename, drop_table=False, keys=['mulu', 'shiyi', 'major_promption', 'content'], text_trans=False, df_json=True):
     """
         获取文件的预信息
     :param path:
@@ -77,7 +77,7 @@ def get_pre_content(path, filename, drop_table=False, keys=['mulu', 'shiyi', 'ma
         _content = tian_chi.get_content(tag)
         # 是否转换 tags ---> text list
         if text_trans:
-            _content, part_table, table_failed = content_format.tags_format(_content)
+            _content, part_table, table_failed = content_format.tags_format(_content, df_json=True)
         content = {'mulu': mulu,
                    'shiyi': shiyi_dict,
                    'major_promption': major_promption,
@@ -129,6 +129,10 @@ class ExtractDevice(content_format.FileTree):
         pass
 
     def extract_from_shiyi(self):
+        """
+            从【释义】中抽取信息
+        :return:
+        """
         mark = []
         mark_com = []
         jiaoyiduifang = []
@@ -147,6 +151,42 @@ class ExtractDevice(content_format.FileTree):
         self.mark_com = mark_com
         self.jiaoyiduifang = jiaoyiduifang
         pass
+
+
+    def extract_from_content_list(self, reg_object, reg=True, title_depth=0):
+        """
+            从【正文】中抽取信息
+        :param reg_object: str 正则对象
+        :param reg: bool 是否用正则
+        :param title_depth: title 深度--与末端级别title的距离
+        :return:
+        """
+        self.get_tree_list()
+        res = []
+        for title in self.titles:
+            title_info = self._title_reg(reg=reg_object, title=title)
+            if len(title_info) == 0:
+                continue
+            if title_info['distance'] == title_depth:
+                content = self.get_tree_content(strcture=title_info['title'], method='content', reg=reg)
+                if content == []:
+                    continue
+                res.append(['->'.join(title_info['title']), content])
+        return res
+
+
+
+    def _title_reg(self, reg, title):
+        res = {}
+        _title = [i for i in title.split('--') if i != '']
+        n = 100
+        for i, j in enumerate(_title):
+            if re.findall(reg, j):
+                n = len(_title) - i - 1
+        if n < 100:
+            res = {'title': _title, 'distance': n}
+        return res
+
 
 def extract_info(tree_list):
     pass

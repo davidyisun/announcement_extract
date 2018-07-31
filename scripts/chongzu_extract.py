@@ -15,6 +15,7 @@ import pandas as pd
 import os
 import math
 import codecs
+import json
 
 
 def from_shiyi(path, filename, outpath, result_append=True):
@@ -63,6 +64,22 @@ def from_shiyi(path, filename, outpath, result_append=True):
     return result
 
 
+def from_content(path, filename, outpath, result_append=True, title_depth=0):
+    data = chongzu.get_pre_content(path=path, filename=filename, keys=['content'], text_trans=True, df_json=True)
+    result = {}
+    reg = '交易标的 *$|标的资产 *$|标的股权 *$'
+    for i, index in enumerate(data):
+        print('extracting from content --- total: {0} --- this: {1} --- file: {2}'.format(len(data), i, index))
+        content = data[index]['content']
+        ExtractDevice = chongzu.ExtractDevice(content_list=content)
+        _res = ExtractDevice.extract_from_content_list(reg_object=reg, title_depth=title_depth)
+        result[index.replace('.html', '')] = _res
+    out = json.dumps(result)
+    with codecs.open(outpath+'mark_in_content.csv', 'a', 'utf8') as f:
+        f.write(out)
+    return result
+
+
 def main(postfix='.html', batches=20):
     """
         信息抽取抽取主程序
@@ -75,12 +92,12 @@ def main(postfix='.html', batches=20):
     label_file = '/data/hadoop/yisun/data/tianchi2/train_label/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
 
-    # --- 天池服务器
-    path = '/home/118_16/data/chongzu_train_html/'
-    filename = None
-    # filename = ['20546245.html']
-    label_file = '../data/train_data/train_labels/chongzu.train'
-    outpath = '../data/extract_result/train_chongzu/'
+    # # --- 天池服务器
+    # path = '/home/118_16/data/chongzu_train_html/'
+    # filename = None
+    # # filename = ['20546245.html']
+    # label_file = '../data/train_data/train_labels/chongzu.train'
+    # outpath = '../data/extract_result/train_chongzu/'
 
     # # --- 本地外部数据 thinkpad ---
     # path = 'E:\\天池大赛\\公告数据\\天池大赛\\announcement_extract\\复赛数据\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
@@ -94,12 +111,12 @@ def main(postfix='.html', batches=20):
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 
-    # --- 本地数据 ---
-    path = '../data/temp2/'
-    filename = None
-    filename = ['19223567.html']
-    outpath = '../data/temp2/result/'
-    label_file = '../data/extract_result/train_chongzu/'
+    # # --- 本地数据 ---
+    # path = '../data/temp2/'
+    # filename = None
+    # # filename = ['9945.html']
+    # outpath = '../data/temp2/result/'
+    # label_file = '../data/extract_result/train_chongzu/'
 
     if filename == None:
         files_name = os.listdir(path)
@@ -110,15 +127,18 @@ def main(postfix='.html', batches=20):
     n_batch = math.ceil(n_files/batches)
     batch_head = 0
     # 清除已有result文件
-    f = [outpath+i for i in os.listdir(outpath)]
-    for i in f:
-        os.remove(i)
+    # f = [outpath+i for i in os.listdir(outpath)]
+    # for i in f:
+    #     os.remove(i)
     # 批量读取写入
     for batch in range(n_batch):
         _file_list = file_list[batch_head:batch_head+batches]
         if len(_file_list) == 0:
             break
-        from_shiyi(path=path, outpath=outpath, filename=_file_list)
+        # --- 从【释义】抽取 ---
+        # from_shiyi(path=path, outpath=outpath, filename=_file_list)
+        # --- 从【正文】抽取 ---
+        r1 = from_content(path=path, outpath=outpath, filename=_file_list, title_depth=0)
         batch_head = batch_head+batches
         print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
     return
@@ -129,5 +149,5 @@ def delete_ouput():
 
 
 if __name__ == '__main__':
-    main(batches=20)
+    main(batches=2)
     pass

@@ -216,7 +216,7 @@ def parser_table(_trs_dict, main_title, df_json=False):
                 if j not in _h_list:
                     _h_list.append(j)
             try:
-                _headers_list.append('-'.join(_h_list))
+                _headers_list.append('-'.join(_h_list))   # 可能存在 header 为 None 的 情况
             except:
                 pass
         # 找 table
