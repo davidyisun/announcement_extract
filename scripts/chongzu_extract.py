@@ -107,7 +107,7 @@ def main(postfix='.html', batches=20):
     #
     # # --- 本地外部数据 ---
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['9898901.html']
+    # filename = ['130794.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 
@@ -127,9 +127,9 @@ def main(postfix='.html', batches=20):
     n_batch = math.ceil(n_files/batches)
     batch_head = 0
     # 清除已有result文件
-    # f = [outpath+i for i in os.listdir(outpath)]
-    # for i in f:
-    #     os.remove(i)
+    f = [outpath+i for i in os.listdir(outpath)]
+    for i in f:
+        os.remove(i)
     # 批量读取写入
     for batch in range(n_batch):
         _file_list = file_list[batch_head:batch_head+batches]

@@ -432,6 +432,8 @@ class FileTree(object):
         for i, j in enumerate(_structure):
             _content = []
             for z in content:
+                if z.get('title') == None:
+                    continue
                 if re.findall(j, z['title']) != []:
                     if isinstance(z['content'], list):
                         _content = _content + z['content']
