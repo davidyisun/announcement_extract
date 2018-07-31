@@ -92,12 +92,12 @@ def main(postfix='.html', batches=20):
     label_file = '/data/hadoop/yisun/data/tianchi2/train_label/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
 
-    # # --- 天池服务器
-    # path = '/home/118_16/data/chongzu_train_html/'
-    # filename = None
-    # # filename = ['20546245.html']
-    # label_file = '../data/train_data/train_labels/chongzu.train'
-    # outpath = '../data/extract_result/train_chongzu/'
+    # --- 天池服务器
+    path = '/home/118_16/data/chongzu_train_html/'
+    filename = None
+    # filename = ['20546245.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/extract_result/train_chongzu/'
 
     # # --- 本地外部数据 thinkpad ---
     # path = 'E:\\天池大赛\\公告数据\\天池大赛\\announcement_extract\\复赛数据\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
