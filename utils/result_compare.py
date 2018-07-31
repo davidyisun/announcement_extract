@@ -34,8 +34,8 @@ def fields_compare(df_label, df_result, main_key, fileds, **kwargs):
     # 合并后会有冗余信息
     _fields_y = [i+'_y' for i in fileds]
     _equl_id = equl_id.copy()
-    _equl_id.drop_duplicates(subset=_fields_y, keep='first', inplace=True)
-
+    if _fields_y != []:
+        _equl_id.drop_duplicates(subset=_fields_y, keep='first', inplace=True)
     id_cor = max(_equl_id.shape[0], 1)
     id_recall = id_cor/id_pos
     id_precision = id_cor/id_act

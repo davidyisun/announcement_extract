@@ -95,11 +95,11 @@ def main(postfix='.html', batches=20):
     # outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
-    # path = '../data/temp2/'
-    # filename = None
-    # filename = ['19223567.html']
-    # outpath = '../data/temp2/result/'
-    # label_file = '../data/extract_result/train_chongzu/'
+    path = '../data/temp2/'
+    filename = None
+    filename = ['19223567.html']
+    outpath = '../data/temp2/result/'
+    label_file = '../data/extract_result/train_chongzu/'
 
     if filename == None:
         files_name = os.listdir(path)

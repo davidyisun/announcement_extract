@@ -365,21 +365,21 @@ class FileTree(object):
         if 'title_h1' in self.types and 'title_h1_' in self.types:
             if self.types.index('title_h1') > self.types.index('title_h1_'):
                 _titles = ['title_zhang', 'title_jie', 'title_h1_', 'title_h1', 'title_h2']
-        self.titles = []  # 文档title
+        self.title_structure = []  # 文档title
         for i, _title in enumerate(_titles):
             if _title in self.types:
-                self.titles.append(_title)
-        self.depth = len(self.titles)  # 文档最大深度
+                self.title_structure.append(_title)
+        self.depth = len(self.title_structure)  # 文档最大深度
         self.file_tree = ''
         self.tree_list = []
-        self.titles = []
+        self.titles = []   # 文档所有章节标题
     def get_file_tree(self):
         """
             ---> 文档树结构
         :return:
         """
         # 切割文段
-        res = self._recursion_tree(content=self.contents, title=self.titles+['aaaa'])
+        res = self._recursion_tree(content=self.contents, title=self.title_structure+['aaaa'])
         self.file_tree = res
         return res
 
@@ -418,6 +418,46 @@ class FileTree(object):
                             'type': i[0]['type'],
                             'content': sub_res})
         return res
+
+
+    def get_tree_content(self, strcture=[], reg=True, method='sub_tree'):
+        content = self.file_tree
+        res = []
+        if reg == True:
+            _structure = [re.compile(i) for i in strcture]
+        else:
+            _structure = strcture
+        for i, j in enumerate(_structure):
+            _content = []
+            for z in content:
+                if re.findall(j, z['title']) != []:
+                    if isinstance(z['content'], list):
+                        _content = _content + z['content']
+                    else:
+                        _content = _content + [z['content']]
+            content = _content
+        if method == 'sub_tree':
+            res = content
+        if method == 'content':
+            res = self._recursion_get_tree_content(content=content)
+        return res
+
+
+    def _recursion_get_tree_content(self, content):
+        res = []
+        if isinstance(content, list):
+            for i in content:
+                if isinstance(i['content'], str) or isinstance(i['content'], dict):
+                    _res = [i]
+                else:
+                    _res = self._recursion_get_tree_content(i['content'])
+                    if _res == []:
+                        continue
+                res = res + _res
+        else:
+            return [content]
+        return res
+
 
     def get_tree_list(self):
         """

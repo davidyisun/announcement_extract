@@ -71,11 +71,11 @@ def save_data(content_object_dict, outpath, content_need_to_save=['mulu', 'shiyi
         if 'tree_list' in content_need_to_save:
             try:
                 with codecs.open(outpath+'{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'a', 'utf8') as f:
-                    content_tree_list = json.dumps({'content': data.file_tree})
+                    content_tree_list = json.dumps({'content': data.tree_list})
                     f.write(content_tree_list)
             except FileNotFoundError:
                 with codecs.open(outpath + '{0}/{1}.txt'.format('content_tree_list', index.replace('.html', '')), 'r','utf8') as f:
-                    content_tree_list = json.dumps({'content': data.file_tree})
+                    content_tree_list = json.dumps({'content': data.tree_list})
                     f.write(content_tree_list)
         # 存储title结构
         if 'title_list' in content_need_to_save:

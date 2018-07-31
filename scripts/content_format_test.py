@@ -34,10 +34,10 @@ def file_tree_test(postfix='.html'):
     outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['20546245.html']
-    # label_file = '../data/train_data/train_labels/chongzu.train'
-    # outpath = '../data/extract_result/train_chongzu/'
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['1008033.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/'
@@ -63,7 +63,9 @@ def file_tree_test(postfix='.html'):
         _content = content_format.tags_format(tags_list=text_list)[0]
         # --- 转换为文档树 ---
         t = content_format.FileTree(content_list=_content)
-        t.get_tree_list()
+        # t.get_tree_list()
+        t.get_file_tree()
+        # result = t.get_tree_content(strcture=['第二章', '实际控制人'], method='content')
         content[index] = t.titles
     return content
 
