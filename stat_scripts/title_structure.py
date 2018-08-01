@@ -70,7 +70,8 @@ def stat(titles_dict):
     has_no_reg = []
     successed = {}
     successed_index = []
-    reg = re.compile('交易标的 *$|标的资产 *$|标的股权 *$')
+    # reg = re.compile('交易标的 *$|标的资产 *$|标的股权 *$')
+    reg = re.compile('资产的*评估 *$|评估概述 *$|评估情况说明 *$|评估情况 *$|[评预]估的?方法|定价方式|定价依据')
     for i, index in enumerate(titles_dict):
         try:
             _content = []
@@ -104,10 +105,14 @@ def main():
     data = pd.DataFrame(successed_index)
     data.columns = ['index', 'distance']
     end_success = [(i[0], successed[i[0]]) for i in successed_index if i[1]==0]
-    return
+    return {'content': title_dict,
+            'failed': failed,
+            'has_no_reg': has_no_reg,
+            'successed': successed,
+            'successed_index': successed_index,
+            'end_success': end_success}
 
 
 if __name__ == '__main__':
     main()
     pass
-

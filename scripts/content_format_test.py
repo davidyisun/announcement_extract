@@ -63,11 +63,11 @@ def file_tree_test(postfix='.html'):
         _content = content_format.tags_format(tags_list=text_list)[0]
         # --- 转换为文档树 ---
         t = content_format.FileTree(content_list=_content)
-        # t.get_tree_list()
+        t.get_tree_list()
         t.get_file_tree()
         # result = t.get_tree_content(strcture=['第二章', '实际控制人'], method='content')
         content[index] = t.titles
-    return content
+    return t
 
 
 if __name__ == '__main__':
