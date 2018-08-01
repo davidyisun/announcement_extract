@@ -153,7 +153,7 @@ class ExtractDevice(content_format.FileTree):
         pass
 
 
-    def extract_from_content_list(self, reg_object, reg=True, title_depth=0):
+    def extract_from_content_on_title(self, reg_object, reg=True, title_depth=0, reget_tree_list=False):
         """
             从【正文】中抽取信息
         :param reg_object: str 正则对象
@@ -161,19 +161,19 @@ class ExtractDevice(content_format.FileTree):
         :param title_depth: title 深度--与末端级别title的距离
         :return:
         """
-        self.get_tree_list()
+        if self.tree_list == '' or reget_tree_list:
+            self.get_tree_list()
         res = []
         for title in self.titles:
             title_info = self._title_reg(reg=reg_object, title=title)
             if len(title_info) == 0:
                 continue
             if title_info['distance'] == title_depth:
-                content = self.get_tree_content(strcture=title_info['title'], method='content', reg=reg)
+                content = self.get_tree_content_on_title(strcture=title_info['title'], method='content', reg=reg)
                 if content == []:
                     continue
                 res.append(['->'.join(title_info['title']), content])
         return res
-
 
 
     def _title_reg(self, reg, title):

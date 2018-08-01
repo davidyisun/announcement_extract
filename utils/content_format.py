@@ -371,7 +371,7 @@ class FileTree(object):
                 self.title_structure.append(_title)
         self.depth = len(self.title_structure)  # 文档最大深度
         self.file_tree = ''
-        self.tree_list = []
+        self.tree_list = ''
         self.titles = []   # 文档所有章节标题
     def get_file_tree(self):
         """
@@ -420,7 +420,7 @@ class FileTree(object):
         return res
 
 
-    def get_tree_content(self, strcture=[], reg=True, method='sub_tree'):
+    def get_tree_content_on_title(self, strcture=[], reg=True, method='sub_tree'):
         if self.file_tree == '':
             self.get_file_tree()
         content = self.file_tree
@@ -495,7 +495,8 @@ class FileTree(object):
                 step = i
                 break
         if step == '':
-            return [{'content': _content, 'type': 'content', 'title': ''}]
+            return [{'title_type': 'content', 'title': '', 'type': i['type'], 'content': i['content']} for i in _content]
+            # return [{'content': _content, 'title_type': 'content', 'title': ''}]
         else:
             if _content[0]['type'] != step:
                 _content = [{'content': '', 'type': 'pre-'+step}] + _content
@@ -512,22 +513,43 @@ class FileTree(object):
             res = []
             for i in sub_content_list:
                 _title = i[0]['content']
-                _type = i[0]['type']
-                _content = []
+                _title_type = i[0]['type']
                 if i == []:
                     continue
                 if len(i) == 1:
-                    _content = i
-                    res = res + [{'content': _content, 'type': _type, 'title': _title}]
+                    res = res + [{'content': _title, 'title_type': _title_type, 'title': _title, 'type':_title_type}]
                 else:
                     sub_res = self._recursion_tree_list(content=i[1:], title=title)
                     for j in sub_res:
                         __title = _title + '--' + j['title']
-                        __type = _type + '--' + j['type']
+                        __title_type = _title_type + '--' + j['title_type']
                         __content = j['content']
-                        res = res + [{'content': __content, 'type': __type, 'title': __title}]
+                        __type = j['type']
+                        res = res + [{'content': __content, 'title_type': __title_type, 'title': __title, 'type':__type}]
         return res
 
+    def get_tree_content_on_text(self, reg_object, reg=True, reget_tree_list=False):
+        """
+             在【正文】中全文检索，定位条件句，获取 tree_list 元素
+        :param reg_object:
+        :param reg:
+        :param reget_tree_list: bool 是否重新生成tree_list
+        :return:
+        """
+        res = []
+        if self.tree_list == '' or reget_tree_list:
+            self.get_tree_list()
+        if reg:
+            reg_object = re.compile(reg_object)
+        for i in self.tree_list:
+            if re.findall(re.compile('table'), i['type']) != []:  # 仅从text里面找，不考虑表格
+                continue
+            if re.findall(reg_object, i['content']) != []:
+                title = [j for j in i['title'].split('--') if j!='']
+                content = i['content']
+                _res = [title, content]
+                res.append(_res)
+        return res
 
 if __name__ == '__main__':
     s = '2．发起人出资情况'

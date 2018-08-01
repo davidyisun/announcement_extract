@@ -72,13 +72,30 @@ def from_content(path, filename, outpath, result_append=True, title_depth=0):
         print('extracting from content --- total: {0} --- this: {1} --- file: {2}'.format(len(data), i, index))
         content = data[index]['content']
         ExtractDevice = chongzu.ExtractDevice(content_list=content)
-        _res = ExtractDevice.extract_from_content_list(reg_object=reg, title_depth=title_depth)
+        _res = ExtractDevice.extract_from_content_on_title(reg_object=reg, title_depth=title_depth)
         result[index.replace('.html', '')] = _res
     out = json.dumps(result)
     with codecs.open(outpath+'mark_in_content.csv', 'a', 'utf8') as f:
+        f.write('\n')
         f.write(out)
     return result
 
+
+def extract_method_from_content(path, filename, outpath):
+    data = chongzu.get_pre_content(path=path, filename=filename, keys=['content'], text_trans=True, df_json=True)
+    result = {}
+    reg = '收益法|资产基础法'
+    for i, index in enumerate(data):
+        print('extracting method from content --- total: {0} --- this: {1} --- file: {2}'.format(len(data), i, index))
+        content = data[index]['content']
+        ExtractDevice = chongzu.ExtractDevice(content_list=content)
+        _res = ExtractDevice.get_tree_content_on_text(reg_object=reg)
+        result[index.replace('.html', '')] = _res
+    out = json.dumps(result)
+    with codecs.open(outpath+'method_text.csv', 'a', 'utf8') as f:
+        f.write('\n')
+        f.write(out)
+    return result
 
 def main(postfix='.html', batches=20):
     """
@@ -92,12 +109,12 @@ def main(postfix='.html', batches=20):
     label_file = '/data/hadoop/yisun/data/tianchi2/train_label/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
 
-    # # --- 天池服务器
-    # path = '/home/118_16/data/chongzu_train_html/'
-    # filename = None
-    # # filename = ['20546245.html']
-    # label_file = '../data/train_data/train_labels/chongzu.train'
-    # outpath = '../data/extract_result/train_chongzu/'
+    # --- 天池服务器
+    path = '/home/118_16/data/chongzu_train_html/'
+    filename = None
+    # filename = ['20546245.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/extract_result/train_chongzu/'
 
     # # --- 本地外部数据 thinkpad ---
     # path = 'E:\\天池大赛\\公告数据\\天池大赛\\announcement_extract\\复赛数据\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
@@ -111,11 +128,11 @@ def main(postfix='.html', batches=20):
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 
-    # # --- 本地数据 ---
-    # path = '../data/temp2/'
+    # --- 本地数据 ---
+    # path = '../data/temp2/samples/'
     # filename = None
-    # # filename = ['9945.html']
-    # outpath = '../data/temp2/result/'
+    # filename = ['8515.html']
+    # outpath = '../data/extract_result/train_chongzu/'
     # label_file = '../data/extract_result/train_chongzu/'
 
     if filename == None:
@@ -138,7 +155,9 @@ def main(postfix='.html', batches=20):
         # --- 从【释义】抽取 ---
         # from_shiyi(path=path, outpath=outpath, filename=_file_list)
         # --- 从【正文】抽取 ---
-        r1 = from_content(path=path, outpath=outpath, filename=_file_list, title_depth=0)
+        # r1 = from_content(path=path, outpath=outpath, filename=_file_list, title_depth=0)
+        # --- 从【正文】中定位【评估方法】 ---
+        res = extract_method_from_content(path=path, outpath=outpath, filename=_file_list)
         batch_head = batch_head+batches
         print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
     return
