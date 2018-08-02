@@ -135,11 +135,11 @@ def main(postfix='.html', batches=20):
     # outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
-    path = '../data/temp2/samples/'
-    filename = None
-    # filename = ['8515.html']
-    outpath = '../data/extract_result/train_chongzu/'
-    label_file = '../data/train_data/train_labels/chongzu.train'
+    # path = '../data/temp2/samples/'
+    # filename = None
+    # # filename = ['8515.html']
+    # outpath = '../data/extract_result/train_chongzu/'
+    # label_file = '../data/train_data/train_labels/chongzu.train'
 
     # --- label 字段 ---
     headers = ['id', 'mark', 'mark_com', 'jiaoyiduifang', 'price', 'method']
