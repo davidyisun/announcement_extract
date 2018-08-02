@@ -68,7 +68,8 @@ def from_shiyi(path, filename, outpath, result_append=True):
 def from_content(path, filename, outpath, result_append=True, title_depth=0):
     data = chongzu.get_pre_content(path=path, filename=filename, keys=['content'], text_trans=True, df_json=True)
     result = {}
-    reg = '交易标的 *$|标的资产 *$|标的股权 *$'
+    # reg = '交易标的 *$|标的资产 *$|标的股权 *$'
+    reg = '(标的资产的*估值)$|(标的资产的*估值)[和及、]|(交易价格)$|(交易价格)[和及、]|交易标的的*资产价格|资产价格|定价$|定价[及、和]'
     for i, index in enumerate(data):
         print('extracting from content --- total: {0} --- this: {1} --- file: {2}'.format(len(data), i, index))
         content = data[index]['content']
@@ -129,11 +130,11 @@ def main(postfix='.html', batches=20):
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
     #
-    # --- 本地外部数据 ---
-    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = ['1871176.html', '1074177.html', '282992.html', '1503346.html', '6122878.html']
-    label_file = '../data/train_data/train_labels/chongzu.train'
-    outpath = '../data/extract_result/train_chongzu/'
+    # # --- 本地外部数据 ---
+    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    # filename = ['1823756.html', '15320606.html', '1266316.html']
+    # label_file = '../data/train_data/train_labels/chongzu.train'
+    # outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/samples/'
@@ -145,6 +146,12 @@ def main(postfix='.html', batches=20):
     # --- label 字段 ---
     headers = ['id', 'mark', 'mark_com', 'jiaoyiduifang', 'price', 'method']
     df_label = result_compare.get_labels(file=label_file+'', headers=headers)
+    # --- 基本评测 ---
+    df = df_label.dropna(subset=['price']).reset_index(drop=True).copy()
+    label_id = [str(i) for i in df['id'].unique().tolist()]
+    not_in_id = copy.deepcopy(label_id)  # 缺失
+    in_id = []
+    out_of_id = []  # 多余
 
     if filename == None:
         files_name = os.listdir(path)
@@ -167,18 +174,14 @@ def main(postfix='.html', batches=20):
         # from_shiyi(path=path, outpath=outpath, filename=_file_list)
 
         # --- 从【正文】抽取 ---
-        # r1 = from_content(path=path, outpath=outpath, filename=_file_list, title_depth=0)
-
-        # --- 从【正文】中定位【评估方法】 ---
-        res = extract_method_from_content(path=path, outpath=outpath, filename=_file_list)
+        res = from_content(path=path, outpath=outpath, filename=_file_list, title_depth=0)
         extract_id = res.keys()
-        df = df_label.dropna(subset=['method']).reset_index(drop=True).copy()
 
-        # --- 基本评测 ---
-        label_id = [str(i) for i in df['id'].unique().tolist()]
-        not_in_id = copy.deepcopy(label_id)  # 缺失
-        in_id = []
-        out_of_id = []  # 多余
+
+        # # --- 从【正文】中定位【评估方法】 ---
+        # res = extract_method_from_content(path=path, outpath=outpath, filename=_file_list)
+        # extract_id = res.keys()
+
 
         in_id = in_id+list(set(label_id).intersection(set(extract_id)))
         not_in_id = list(set(not_in_id).difference(set(extract_id)))
@@ -186,6 +189,7 @@ def main(postfix='.html', batches=20):
         batch_head = batch_head+batches
         print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
         print('in id :{0}'.format(len(in_id)))
+
     with codecs.open(outpath+'stat_result.txt', 'w', 'utf8') as f:
         f.write('------------------------\n')
         f.write('in_id: {0}'.format(len(in_id)))

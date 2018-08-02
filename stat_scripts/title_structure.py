@@ -131,8 +131,7 @@ def main(depth=0):
     not_in_id = list(set(label_id).difference(set(end_success.keys())))
     out_of_id = list(set(end_success.keys()).difference(set(label_id)))
 
-
-    return {'content': title_dict,
+    res = {'content': title_dict,
             'failed': failed,
             'has_no_reg': has_no_reg,
             'successed': successed,
@@ -142,6 +141,7 @@ def main(depth=0):
             'not_in_id': not_in_id,
             'out_of_id': out_of_id}
 
+    return res
 
 if __name__ == '__main__':
     res = main(depth=0)
