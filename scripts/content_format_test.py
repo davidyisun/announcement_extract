@@ -35,7 +35,7 @@ def file_tree_test(postfix='.html'):
 
     # --- 本地外部数据 ---
     path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    filename = ['1008033.html']
+    filename = ['16309960.html']
     label_file = '../data/train_data/train_labels/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
 

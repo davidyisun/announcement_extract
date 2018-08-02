@@ -128,11 +128,11 @@ def main(postfix='.html', batches=20):
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
     #
-    # # --- 本地外部数据 ---
-    # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['130794.html']
-    # label_file = '../data/train_data/train_labels/chongzu.train'
-    # outpath = '../data/extract_result/train_chongzu/'
+    # --- 本地外部数据 ---
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
+    filename = ['1871176.html', '1074177.html', '282992.html', '1503346.html', '6122878.html']
+    label_file = '../data/train_data/train_labels/chongzu.train'
+    outpath = '../data/extract_result/train_chongzu/'
 
     # --- 本地数据 ---
     # path = '../data/temp2/samples/'
@@ -184,6 +184,7 @@ def main(postfix='.html', batches=20):
         out_of_id = out_of_id+list(set(extract_id).difference(set(label_id)))
         batch_head = batch_head+batches
         print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
+        print('in id :{0}'.format(len(in_id)))
     with codecs.open(outpath+'stat_result.txt', 'w', 'utf8') as f:
         f.write('------------------------\n')
         f.write('in_id: {0}'.format(len(in_id)))
