@@ -103,6 +103,7 @@ def extract_method_from_content(path, filename, outpath):
         f.write(out)
     return result
 
+
 def main(postfix='.html', batches=20):
     """
         信息抽取抽取主程序

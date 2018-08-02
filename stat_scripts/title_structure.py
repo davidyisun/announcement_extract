@@ -13,6 +13,7 @@ import codecs
 import json
 import re
 import pandas as pd
+from utils import result_compare
 
 
 # # --- 本地外部数据 ---
@@ -21,6 +22,7 @@ filename = ['9123.txt']
 filename = None
 label_file = '../data/train_data/train_labels/chongzu.train'
 outpath = '../data/temp2/result/chongzu/'
+import copy
 
 #
 # # --- 本地外部数据 thinkpad ---
@@ -71,7 +73,8 @@ def stat(titles_dict):
     successed = {}
     successed_index = []
     # reg = re.compile('交易标的 *$|标的资产 *$|标的股权 *$')
-    reg = re.compile('资产的*评估 *$|评估概述 *$|评估情况说明 *$|评估情况 *$|[评预]估的?方法|定价方式|定价依据')
+    # reg = re.compile('资产的*评估 *$|评估概述 *$|评估情况说明 *$|评估情况 *$|[评预]估的?方法|定价方式|定价依据')
+    reg = re.compile('（标的资产的*估值）$|（标的资产的*估值）[和及、]|（交易价格）$|（交易价格）[和及、]|交易标的的*资产价格|资产价格|定价$|定价[及、和]')
     for i, index in enumerate(titles_dict):
         try:
             _content = []
@@ -93,26 +96,53 @@ def stat(titles_dict):
     return failed, has_no_reg, successed, successed_index
 
 
-def main():
+def get_title_in_depth(depth, successed_index, successed):
+    res = [(i[0], successed[i[0]]) for i in successed_index if i[1]==depth]
+    return res
+
+
+def main(depth=0):
     title_dict = read_title()
     # out = json.dumps(title_dict)
     # with codecs.open('../data/temp/title_list.txt', 'w', 'utf8') as f:
     #     f.write(out)
+
+    # --- label 字段 ---
+    headers = ['id', 'mark', 'mark_com', 'jiaoyiduifang', 'price', 'method']
+    df_label = result_compare.get_labels(file=label_file+'', headers=headers)
+    key = 'price'
+    df = df_label.dropna(subset=[key]).reset_index(drop=True).copy()
+    label_id = [str(i) for i in df['id'].unique().tolist()]
+
+
     failed, has_no_reg, successed, successed_index = stat(title_dict)
     print('total for fialed: {0}'.format(len(failed)))
     print('total for has_no_reg: {0}'.format(len(has_no_reg)))
     print('total for successed: {0}'.format(len(successed)))
     data = pd.DataFrame(successed_index)
     data.columns = ['index', 'distance']
-    end_success = [(i[0], successed[i[0]]) for i in successed_index if i[1]==0]
+    end_success = {}
+    for i in successed_index:
+        if i[1] == depth:
+            end_success[i[0]] = successed[i[0]]
+
+
+    in_id = list(set(label_id).intersection(set(end_success.keys())))
+    not_in_id = list(set(label_id).difference(set(end_success.keys())))
+    out_of_id = list(set(end_success.keys()).difference(set(label_id)))
+
+
     return {'content': title_dict,
             'failed': failed,
             'has_no_reg': has_no_reg,
             'successed': successed,
             'successed_index': successed_index,
-            'end_success': end_success}
+            'end_success': end_success,
+            'in_id': in_id,
+            'not_in_id': not_in_id,
+            'out_of_id': out_of_id}
 
 
 if __name__ == '__main__':
-    main()
+    res = main(depth=0)
     pass
