@@ -186,6 +186,8 @@ def main(postfix='.html', batches=20):
         print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
     with codecs.open(outpath+'stat_result.txt', 'w', 'utf8') as f:
         f.write('------------------------\n')
+        f.write('in_id: {0}'.format(len(in_id)))
+        f.write('------------------------\n')
         f.write('not_in_id: {0}'.format(len(not_in_id))+'\n')
         f.write(' '.join(not_in_id))
         f.write('\n------------------------\n')
