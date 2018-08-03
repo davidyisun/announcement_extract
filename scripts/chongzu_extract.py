@@ -65,7 +65,7 @@ def from_shiyi(path, filename, outpath, result_append=True):
     return result
 
 
-def from_content_on_title(path, filename, outpath, result_append=True, title_depth=0):
+def from_content_on_title(path, filename, outpath, title_depth=0):
     data = chongzu.get_pre_content(path=path, filename=filename, keys=['content'], text_trans=True, df_json=True)
     result = {}
     # reg = '交易标的 *$|标的资产 *$|标的股权 *$'
@@ -75,6 +75,8 @@ def from_content_on_title(path, filename, outpath, result_append=True, title_dep
         content = data[index]['content']
         ExtractDevice = chongzu.ExtractDevice(content_list=content)
         _res = ExtractDevice.extract_from_content_on_title(reg_object=reg, title_depth=title_depth)
+        if _res==[]:
+            continue
         result[index.replace('.html', '')] = _res
     out = json.dumps(result)
     with codecs.open(outpath+'price_in_content.csv', 'a', 'utf8') as f:
@@ -132,7 +134,7 @@ def main(postfix='.html', batches=20):
     #
     # # --- 本地外部数据 ---
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['1823756.html', '15320606.html', '1266316.html']
+    # filename = ['997115.html']
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 
@@ -165,11 +167,18 @@ def main(postfix='.html', batches=20):
     f = [outpath+i for i in os.listdir(outpath)]
     for i in f:
         os.remove(i)
+
+    con = False
     # 批量读取写入
     for batch in range(n_batch):
         _file_list = file_list[batch_head:batch_head+batches]
         if len(_file_list) == 0:
             break
+
+        if '997115.html' in _file_list:
+            con = True
+        if con == False:
+            continue
         # --- 从【释义】抽取 ---
         # from_shiyi(path=path, outpath=outpath, filename=_file_list)
 

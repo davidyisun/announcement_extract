@@ -426,7 +426,10 @@ class FileTree(object):
         content = self.file_tree
         res = []
         if reg == True:
-            _structure = [re.compile(i) for i in strcture]
+            try:
+                _structure = [re.compile(i) for i in strcture]
+            except:
+                pass
         else:
             _structure = strcture
         for i, j in enumerate(_structure):
