@@ -49,9 +49,11 @@ def main(postfix='.html', batches=20):
         if len(_file_list) == 0:
             break
 
+
     # reg1 = RegObject(name='mark', reg_on_key='交易标的 *$|标的资产 *$|标的股权 *$')
     # k = ExtractDevice()
     # l = k.extract_from_content_on_title(reg_object=reg1)
+
 
 if __name__ == '__main__':
     pass

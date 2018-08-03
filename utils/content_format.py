@@ -426,10 +426,7 @@ class FileTree(object):
         content = self.file_tree
         res = []
         if reg == True:
-            try:
-                _structure = [re.compile(i) for i in strcture]
-            except:
-                pass
+            _structure = [re.compile(i.replace('\\', '')) for i in strcture]
         else:
             _structure = strcture
         for i, j in enumerate(_structure):

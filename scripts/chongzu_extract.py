@@ -132,9 +132,10 @@ def main(postfix='.html', batches=20):
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
     #
-    # # --- 本地外部数据 ---
+    # --- 本地外部数据 ---
     # path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
-    # filename = ['997115.html']
+    # filename = ['15895071.html']
+    # # filename = None
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 
@@ -175,10 +176,13 @@ def main(postfix='.html', batches=20):
         if len(_file_list) == 0:
             break
 
-        if '997115.html' in _file_list:
+        if '15895071.html' in _file_list:
             con = True
         if con == False:
+            batch_head = batch_head + batches
             continue
+
+
         # --- 从【释义】抽取 ---
         # from_shiyi(path=path, outpath=outpath, filename=_file_list)
 
@@ -198,6 +202,7 @@ def main(postfix='.html', batches=20):
         batch_head = batch_head+batches
         print('total: {0} --- has been processed: {1}'.format(len(file_list), min(len(file_list), batch_head)))
         print('in id :{0}'.format(len(in_id)))
+
 
     with codecs.open(outpath+'stat_result.txt', 'w', 'utf8') as f:
         f.write('------------------------\n')
