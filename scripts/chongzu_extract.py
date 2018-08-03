@@ -65,7 +65,7 @@ def from_shiyi(path, filename, outpath, result_append=True):
     return result
 
 
-def from_content(path, filename, outpath, result_append=True, title_depth=0):
+def from_content_on_title(path, filename, outpath, result_append=True, title_depth=0):
     data = chongzu.get_pre_content(path=path, filename=filename, keys=['content'], text_trans=True, df_json=True)
     result = {}
     # reg = '交易标的 *$|标的资产 *$|标的股权 *$'
@@ -77,7 +77,7 @@ def from_content(path, filename, outpath, result_append=True, title_depth=0):
         _res = ExtractDevice.extract_from_content_on_title(reg_object=reg, title_depth=title_depth)
         result[index.replace('.html', '')] = _res
     out = json.dumps(result)
-    with codecs.open(outpath+'mark_in_content.csv', 'a', 'utf8') as f:
+    with codecs.open(outpath+'price_in_content.csv', 'a', 'utf8') as f:
         f.write('\n')
         f.write(out)
     return result
@@ -174,7 +174,7 @@ def main(postfix='.html', batches=20):
         # from_shiyi(path=path, outpath=outpath, filename=_file_list)
 
         # --- 从【正文】抽取 ---
-        res = from_content(path=path, outpath=outpath, filename=_file_list, title_depth=0)
+        res = from_content_on_title(path=path, outpath=outpath, filename=_file_list, title_depth=0)
         extract_id = res.keys()
 
 

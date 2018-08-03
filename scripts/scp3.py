@@ -130,13 +130,20 @@ def tianchi_html_to_text_complete(drop_table=True):
     """
     from fomat_conversion import tianchi_html_complete as th
     import codecs
-    path = '../data/0605/增减持/html/'
-    filename = None
-    outpath = '../data/0605_txt/增减持/'
-    path = '../data/0605/增减持/html/'
-    path = '../data/temp2/'
+    # path = '../data/0605/增减持/html/'
+    # filename = None
+    # outpath = '../data/0605_txt/增减持/'
+    # path = '../data/0605/增减持/html/'
+    # path = '../data/temp2/'
     # filename = '5885.html'
-    outpath = '../data/temp2/'
+    # outpath = '../data/temp2/'
+
+    # --- 本地外部数据 ---
+    path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\参赛数据2\\round1_train_20180518\\增减持\\html\\'
+    filename = '1823756.html'
+    filename = None
+    outpath = 'D:\\TianChi_competition\\公告信息抽取\\materials\\format_data\\zengjianchi_train\\'
+
     html_dict = th.read_html2(filepath=path, filename=filename)
     total = 0
     contents = {}
@@ -163,10 +170,8 @@ def tianchi_html_to_text_complete(drop_table=True):
             f.write('\n'.join(output))
 
 
-
-
 if __name__ == '__main__':
-    tianchi_html_to_text_complete(drop_table=False)
+    tianchi_html_to_text_complete(drop_table=True)
     # test_table()
     # html_to_test()
     # table_to_txt_test() # 批量转换含表格html  仕锋软件
