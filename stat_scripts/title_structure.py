@@ -74,7 +74,8 @@ def stat(titles_dict):
     successed_index = []
     # reg = re.compile('交易标的 *$|标的资产 *$|标的股权 *$')
     # reg = re.compile('资产的*评估 *$|评估概述 *$|评估情况说明 *$|评估情况 *$|[评预]估的?方法|定价方式|定价依据')
-    reg = re.compile('（标的资产的*估值）$|（标的资产的*估值）[和及、]|（交易价格）$|（交易价格）[和及、]|交易标的的*资产价格|资产价格|定价$|定价[及、和]')
+    # reg = re.compile('（标的资产的*估值）$|（标的资产的*估值）[和及、]|（交易价格）$|（交易价格）[和及、]|交易标的的*资产价格|资产价格|定价$|定价[及、和]')
+    reg = re.compile('交易对方')
     for i, index in enumerate(titles_dict):
         try:
             _content = []
@@ -110,7 +111,7 @@ def main(depth=0):
     # --- label 字段 ---
     headers = ['id', 'mark', 'mark_com', 'jiaoyiduifang', 'price', 'method']
     df_label = result_compare.get_labels(file=label_file+'', headers=headers)
-    key = 'price'
+    key = 'jiaoyiduifang'
     df = df_label.dropna(subset=[key]).reset_index(drop=True).copy()
     label_id = [str(i) for i in df['id'].unique().tolist()]
 
