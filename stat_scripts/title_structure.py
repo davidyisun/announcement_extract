@@ -108,6 +108,7 @@ def main(depth=0):
     # with codecs.open('../data/temp/title_list.txt', 'w', 'utf8') as f:
     #     f.write(out)
 
+
     # --- label 字段 ---
     headers = ['id', 'mark', 'mark_com', 'jiaoyiduifang', 'price', 'method']
     df_label = result_compare.get_labels(file=label_file+'', headers=headers)
@@ -132,6 +133,7 @@ def main(depth=0):
     not_in_id = list(set(label_id).difference(set(end_success.keys())))
     out_of_id = list(set(end_success.keys()).difference(set(label_id)))
 
+
     res = {'content': title_dict,
             'failed': failed,
             'has_no_reg': has_no_reg,
@@ -141,8 +143,8 @@ def main(depth=0):
             'in_id': in_id,
             'not_in_id': not_in_id,
             'out_of_id': out_of_id}
-
     return res
+
 
 if __name__ == '__main__':
     res = main(depth=0)
