@@ -14,9 +14,12 @@ from utils import result_compare
 result = pd.read_table('../data/temp/hzl_csv.txt', sep='\t', encoding='utf8', header=None)
 lable = pd.read_table('../data/train_data/train_labels/chongzu.train', sep='\t', encoding='utf8', header=None)
 headers = ['id', 'mark', 'mark_com', 'jiaoyiduifang', 'price', 'method']
-result.columns = headers[:-1]
+result.columns = headers
 lable.columns = headers
 
-res1 = result_compare.fields_compare(df_label=lable, df_result=result, main_key=['id', 'mark_com'], fileds=['mark'], is_print=True)
-res2 = result_compare.fields_compare(df_label=lable, df_result=result, main_key=['id', 'mark'], fileds=['mark_com'], is_print=True)
+# res1 = result_compare.fields_compare(df_label=lable, df_result=result, main_key=['id', 'mark_com'], fileds=['mark'], is_print=True)
+# res2 = result_compare.fields_compare(df_label=lable, df_result=result, main_key=['id', 'mark'], fileds=['mark_com'], is_print=True)
+
+res = result_compare.fields_compare(df_label=lable, df_result=result, main_key=['id', 'mark', 'mark'], fileds=headers[3:], is_print=True)
+
 pass

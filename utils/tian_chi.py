@@ -10,7 +10,7 @@ import sys
 sys.path.append('../')
 import codecs
 from bs4 import BeautifulSoup
-import os
+import copy
 import re
 from utils import html_table
 import itertools
@@ -132,7 +132,7 @@ def extract_pre_content(tag):
     mp_tag = tag.find_all('div', title=re.compile('重大事项提示'))
     if mp_tag != []:
         mp_tag = mp_tag[0]
-        major_promption = mp_tag.get_text()
+        major_promption = copy.deepcopy(mp_tag)
         mp_tag.decompose()
     return mulu, shiyi_dict, major_promption, tag
 

@@ -27,11 +27,13 @@ def file_tree_test(postfix='.html'):
     # label_file = '../data/train_data/train_labels/chongzu.train'
     # outpath = '../data/extract_result/train_chongzu/'
 
+
     # --- 本地外部数据 thinkpad ---
     path = 'E:\\天池大赛\\公告数据\\天池大赛\\announcement_extract\\复赛数据\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
     filename = ['20546245.html']
     label_file = '../data/train_data/train_labels/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
+
 
     # --- 本地外部数据 ---
     path = 'D:\\TianChi_competition\\公告信息抽取\\materials\\复赛\\复赛新增类型训练数据-20180712\\资产重组\\html\\'
@@ -39,12 +41,14 @@ def file_tree_test(postfix='.html'):
     label_file = '../data/train_data/train_labels/chongzu.train'
     outpath = '../data/extract_result/train_chongzu/'
 
+
     # --- 本地数据 ---
     # path = '../data/temp2/'
     # filename = None
     # filename = ['19223567.html']
     # outpath = '../data/temp2/result/'
     # label_file = '../data/extract_result/train_chongzu/'
+
 
     if filename == None:
         files_name = os.listdir(path)
@@ -57,7 +61,7 @@ def file_tree_test(postfix='.html'):
         # -------------------------- 核心过程 -----------------------------
         # --- 获取预内容 ---
         tag = tian_chi.extract_pre_content(html_dict[index])[3]
-        # --- 获取天池text+table ---
+        # --- 获取天池 text+table ---
         text_list = tian_chi.get_content(tag)
         # --- text to text_list
         _content = content_format.tags_format(tags_list=text_list)[0]
