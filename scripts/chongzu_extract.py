@@ -69,7 +69,8 @@ def from_content_on_title(path, filename, outpath, title_depth=0):
     data = chongzu.get_pre_content(path=path, filename=filename, keys=['content'], text_trans=True, df_json=True)
     result = {}
     # reg = '交易标的 *$|标的资产 *$|标的股权 *$'
-    reg = '(标的资产的*估值)$|(标的资产的*估值)[和及、]|(交易价格)$|(交易价格)[和及、]|交易标的的*资产价格|资产价格|定价$|定价[及、和]'
+    # reg = '(标的资产的*估值)$|(标的资产的*估值)[和及、]|(交易价格)$|(交易价格)[和及、]|交易标的的*资产价格|资产价格|定价$|定价[及、和]'
+    reg = '交易对方'
     for i, index in enumerate(data):
         print('extracting from content --- total: {0} --- this: {1} --- file: {2}'.format(len(data), i, index))
         content = data[index]['content']
@@ -79,7 +80,7 @@ def from_content_on_title(path, filename, outpath, title_depth=0):
             continue
         result[index.replace('.html', '')] = _res
     out = json.dumps(result)
-    with codecs.open(outpath+'price_in_content.csv', 'a', 'utf8') as f:
+    with codecs.open(outpath+'jiaoyiduifang_in_content.csv', 'a', 'utf8') as f:
         f.write('\n')
         f.write(out)
     return result
@@ -169,20 +170,12 @@ def main(postfix='.html', batches=20):
     for i in f:
         os.remove(i)
 
-    con = False
+
     # 批量读取写入
     for batch in range(n_batch):
         _file_list = file_list[batch_head:batch_head+batches]
         if len(_file_list) == 0:
             break
-
-        if '15895071.html' in _file_list:
-            con = True
-        if con == False:
-            batch_head = batch_head + batches
-            continue
-
-
         # --- 从【释义】抽取 ---
         # from_shiyi(path=path, outpath=outpath, filename=_file_list)
 

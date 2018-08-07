@@ -178,7 +178,8 @@ class ExtractDevice(content_format.FileTree):
 
     def _title_reg(self, reg, title):
         res = {}
-        _title = [i for i in title.split('--') if i != '']
+        _title = re.sub(re.compile('--$'), '', title)
+        _title = [i for i in _title.split('--')]
         n = 100
         for i, j in enumerate(_title):
             if re.findall(reg, j):
