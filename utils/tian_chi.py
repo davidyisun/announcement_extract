@@ -132,7 +132,7 @@ def extract_pre_content(tag):
     mp_tag = tag.find_all('div', title=re.compile('重大事项提示'))
     if mp_tag != []:
         mp_tag = mp_tag[0]
-        major_promption = copy.deepcopy(mp_tag)
+        major_promption = get_content(mp_tag)
         mp_tag.decompose()
     return mulu, shiyi_dict, major_promption, tag
 

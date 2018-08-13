@@ -60,13 +60,16 @@ def file_tree_test(postfix='.html'):
     for index in html_dict:
         # -------------------------- 核心过程 -----------------------------
         # --- 获取预内容 ---
-        tag = tian_chi.extract_pre_content(html_dict[index])[3]
+        res = tian_chi.extract_pre_content(html_dict[index])
+        tag = res[3]
+        _major_promption = res[2]
         # --- 获取天池 text+table ---
         text_list = tian_chi.get_content(tag)
         # --- text to text_list
         _content = content_format.tags_format(tags_list=text_list)[0]
+        major_promption = content_format.tags_format(_major_promption)[0]
         # --- 转换为文档树 ---
-        t = content_format.FileTree(content_list=_content)
+        t = content_format.FileTree(content_list=_content, zhongdashixiangtishi=major_promption)
         t.get_tree_list()
         t.get_file_tree()
         # result = t.get_tree_content(strcture=['第二章', '实际控制人'], method='content')
