@@ -333,7 +333,6 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +Created on 2018--
 +@author:David Yisun
 +@group:data
-+@contact:davidhu@wezhuiyi.com
 +"""
 +from demo_txt import *
 +
@@ -368,7 +367,6 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +Created on 2018-06-28
 +@author:David Yisun
 +@group:data
-+@contact:davidhu@wezhuiyi.com
 +"""
 +import copy
 +import os
